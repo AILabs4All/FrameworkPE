@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Serviço Ollama para hospedar modelos SLM
   ollama:

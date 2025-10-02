@@ -81,3 +81,6 @@ htmlcov/
 Dockerfile
 docker-compose*.yml
 .dockerignore
+
+# Requirements original (usa a versão Docker)
+requirements.txt

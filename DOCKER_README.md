@@ -2,6 +2,13 @@
 
 Este documento fornece instruções completas para executar o **Security Incident Classification Framework** usando Docker Compose, permitindo executar experimentos automatizados com todos os 27 modelos SLM configurados.
 
+## 🔧 Correções Aplicadas
+
+- **✅ Removido atributo `version` obsoleto** do docker-compose.yml
+- **✅ Adicionado GCC e ferramentas de compilação** no Dockerfile para resolver erro do pacote `madoka`
+- **✅ Criado requirements-docker.txt** sem dependências problemáticas
+- **✅ Otimizado Dockerfile** com limpeza de dependências de build após instalação
+
 ## 📋 Pré-requisitos
 
 - **Docker Engine** >= 20.10
@@ -22,33 +29,40 @@ cd /path/to/security-incident-framework
 
 ```bash
 # Construir e iniciar todos os serviços
-docker-compose up -d
+docker compose up -d
 
 # Verificar status dos serviços
-docker-compose ps
+docker compose ps
 ```
 
 ### 3. Configurar Modelos Ollama (Primeira Execução)
 
 ```bash
 # Inicializar todos os 27 modelos SLM automaticamente
-docker-compose run --rm model-setup
+docker compose run --rm model-setup
 
 # Ou verificar modelos disponíveis
-docker-compose exec ollama ollama list
+docker compose exec ollama ollama list
 ```
 
 ### 4. Executar Experimentos
 
 ```bash
+# OPÇÃO 1: Usando o script helper (RECOMENDADO)
+./docker-helper.sh start          # Iniciar serviços
+./docker-helper.sh setup-models   # Configurar modelos
+./docker-helper.sh dry-run         # Visualizar comandos
+./docker-helper.sh run-experiment  # Executar experimento
+
+# OPÇÃO 2: Comandos manuais
 # Modo dry-run (visualizar comandos sem executar)
-docker-compose run --rm framework ./docker-script.sh --dry-run
+docker compose run --rm framework ./docker-script.sh --dry-run
 
 # Execução completa do experimento
-docker-compose run --rm framework ./docker-script.sh
+docker compose run --rm framework ./docker-script.sh
 
 # Executar experimento específico manualmente
-docker-compose run --rm framework python main.py data/ --columns target --model ollama_mistral_7b --technique progressive_hint --output xlsx
+docker compose run --rm framework python main.py data/ --columns target --model ollama_mistral_7b --technique progressive_hint --output xlsx
 ```
 
 ## 📁 Estrutura de Volumes
@@ -79,7 +93,7 @@ Diretório Local → Container
 ### 3. **model-setup** - Inicializador de Modelos
 - **Build**: Dockerfile local
 - **Função**: Download automático dos 27 modelos SLM
-- **Execução**: sob demanda (`docker-compose run model-setup`)
+- **Execução**: sob demanda (`docker compose run model-setup`)
 
 ## 🔍 Comandos Úteis
 
@@ -87,30 +101,30 @@ Diretório Local → Container
 
 ```bash
 # Iniciar todos os serviços
-docker-compose up -d
+docker compose up -d
 
 # Parar todos os serviços
-docker-compose down
+docker compose down
 
 # Visualizar logs
-docker-compose logs -f framework
-docker-compose logs -f ollama
+docker compose logs -f framework
+docker compose logs -f ollama
 
 # Remover tudo (incluindo volumes)
-docker-compose down -v
+docker compose down -v
 ```
 
 ### Execução de Experimentos
 
 ```bash
 # Dry-run completo (ver todos os 108 comandos)
-docker-compose run --rm framework ./docker-script.sh --dry-run
+docker compose run --rm framework ./docker-script.sh --dry-run
 
 # Execução real de todos os experimentos
-docker-compose run --rm framework ./docker-script.sh
+docker compose run --rm framework ./docker-script.sh
 
 # Executar apenas um modelo/técnica específicos
-docker-compose run --rm framework python main.py data/ \
+docker compose run --rm framework python main.py data/ \
     --columns target \
     --model ollama_mistral_7b \
     --technique progressive_hint \
@@ -122,13 +136,13 @@ docker-compose run --rm framework python main.py data/ \
 
 ```bash
 # Listar modelos instalados
-docker-compose exec ollama ollama list
+docker compose exec ollama ollama list
 
 # Baixar modelo específico
-docker-compose exec ollama ollama pull mistral:7b
+docker compose exec ollama ollama pull mistral:7b
 
 # Remover modelo
-docker-compose exec ollama ollama rm mistral:7b
+docker compose exec ollama ollama rm mistral:7b
 
 # Verificar status do Ollama
 curl http://localhost:11434/api/tags
@@ -138,16 +152,16 @@ curl http://localhost:11434/api/tags
 
 ```bash
 # Acessar shell do container da aplicação
-docker-compose run --rm framework bash
+docker compose run --rm framework bash
 
 # Acessar shell do container Ollama
-docker-compose exec ollama bash
+docker compose exec ollama bash
 
 # Verificar recursos utilizados
 docker stats
 
 # Limpar containers parados
-docker-compose down --remove-orphans
+docker compose down --remove-orphans
 ```
 
 ## 📊 Execução de Experimentos
@@ -188,7 +202,7 @@ logs/
 ### Recursos Recomendados
 
 ```yaml
-# Para modificar no docker-compose.yml
+# Para modificar no docker compose.yml
 services:
   ollama:
     deploy:
@@ -221,10 +235,10 @@ services:
 
 ```bash
 # Verificar logs do Ollama
-docker-compose logs ollama
+docker compose logs ollama
 
 # Reiniciar serviço Ollama
-docker-compose restart ollama
+docker compose restart ollama
 
 # Verificar conectividade
 curl http://localhost:11434/api/tags
@@ -234,16 +248,16 @@ curl http://localhost:11434/api/tags
 
 ```bash
 # Executar setup de modelos novamente
-docker-compose run --rm model-setup
+docker compose run --rm model-setup
 
 # Verificar modelos disponíveis
-docker-compose exec ollama ollama list
+docker compose exec ollama ollama list
 ```
 
 ### Problema: Erro de memória
 
 ```bash
-# Aumentar recursos no docker-compose.yml
+# Aumentar recursos no docker compose.yml
 # Ou executar menos modelos simultaneamente
 # Verificar uso de recursos
 docker stats
@@ -256,7 +270,7 @@ docker stats
 sudo chown -R $USER:$USER ./data ./results ./logs
 
 # Ou executar como root (não recomendado)
-docker-compose run --rm --user root framework ./docker-script.sh
+docker compose run --rm --user root framework ./docker-script.sh
 ```
 
 ## 📈 Monitoramento
@@ -265,10 +279,10 @@ docker-compose run --rm --user root framework ./docker-script.sh
 
 ```bash
 # Logs em tempo real
-docker-compose logs -f framework
+docker compose logs -f framework
 
 # Status dos containers
-watch docker-compose ps
+watch docker compose ps
 
 # Uso de recursos
 watch docker stats
@@ -286,10 +300,10 @@ O framework gera automaticamente:
 
 ```bash
 # Parar todos os serviços
-docker-compose down
+docker compose down
 
 # Remover volumes (CUIDADO: perde modelos baixados)
-docker-compose down -v
+docker compose down -v
 
 # Limpeza completa
 docker system prune -a
