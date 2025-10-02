@@ -1,15 +1,9 @@
-# Dockerfile para Security Incident Framework
-FROM python:3.11-slim
+FROM python:3.11-bookworm
 
-# Instalar dependências do sistema e ferramentas de compilação
+# Instalar apenas dependências essenciais (compiladores já incluídos)
 RUN apt-get update && apt-get install -y \
     curl \
     jq \
-    bash \
-    gcc \
-    g++ \
-    build-essential \
-    python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Definir diretório de trabalho
