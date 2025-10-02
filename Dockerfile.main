@@ -1,0 +1,32 @@
+# Dockerfile otimizado para execução de experimentos main.py
+FROM python:3.11-slim
+
+# Instalar apenas dependências essenciais
+RUN apt-get update && apt-get install -y \
+    curl \
+    jq \
+    && rm -rf /var/lib/apt/lists/*
+
+# Diretório de trabalho
+WORKDIR /app
+
+# Copiar e instalar dependências Python
+COPY requirements-docker.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copiar código da aplicação
+COPY . .
+
+# Criar diretórios necessários
+RUN mkdir -p logs results data/output
+
+# Definir variáveis de ambiente
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+
+# Usuário não-root
+RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+USER appuser
+
+# Comando padrão
+CMD ["python", "main.py", "--help"]
