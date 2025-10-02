@@ -1,0 +1,353 @@
+{
+  "framework": {
+    "name": "Security Incident Classification Framework",
+    "version": "2.0.0",
+    "description": "Framework pluginável para classificação de incidentes de segurança usando múltiplas técnicas de prompt e modelos LLM/SLM"
+  },
+  "logging": {
+    "level": "INFO",
+    "log_dir": "logs",
+    "enable_console": true,
+    "enable_file": true
+  },
+  "models": {
+    "openai_gpt4": {
+      "plugin": "APIModel",
+      "provider": "openai",
+      "model": "gpt-4",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "api_key": "${OPENAI_API_KEY}",
+      "base_url": null
+    },
+    "ollama_deepseek_15b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "deepseek-r1:1.5b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_qwen3_0_6b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "qwen3:0.6b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_qwen3_1_7b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "qwen3:1.7b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_qwen3_4b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "qwen3:4b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_qwen3_8b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "qwen3:8b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_llama3_1_8b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "llama3.1:8b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_llama3_2_1b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "llama3.2:1b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_llama3_2_3b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "llama3.2:3b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_deepseek_r1_7b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "deepseek-r1:7b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_deepseek_r1_8b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "deepseek-r1:8b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_deepseek_r1_14b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "deepseek-r1:14b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_mistral_7b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "mistral:7b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_phi3_3_8b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "phi3:3.8b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_phi3_14b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "phi3:14b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_smollm2_135m": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "smollm2:135m",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_smollm2_360m": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "smollm2:360m",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_smollm2_1_7b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "smollm2:1.7b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_falcon3_1b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "falcon3:1b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_falcon3_3b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "falcon3:3b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_falcon3_7b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "falcon3:7b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_falcon3_10b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "falcon3:10b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_gemma3_270m": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "gemma3:270m",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_gemma3_1b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "gemma3:1b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_gemma3_4b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "gemma3:4b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_gemma3_12b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "gemma3:12b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_granite3_2_2b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "granite3.2:2b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_granite3_2_8b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "granite3.2:8b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    }
+  },
+  "prompt_techniques": {
+    "progressive_hint": {
+      "plugin": "ProgressiveHintPlugin",
+      "description": "Progressive Hint Prompting - Gera dicas progressivas para melhorar a classificação",
+      "default_params": {
+        "max_hints": 4,
+        "limite_rouge": 0.9
+      }
+    },
+    "self_hint": {
+      "plugin": "SelfHintPlugin",
+      "description": "Self Hint Prompting - O modelo gera seu próprio plano e se auto-refina",
+      "default_params": {
+        "max_iter": 4,
+        "limite_qualidade": 0.9
+      }
+    },
+    "progressive_rectification": {
+      "plugin": "ProgressiveRectificationPlugin",
+      "description": "Progressive Rectification Prompting - Valida e retifica respostas usando mascaramento",
+      "default_params": {
+        "max_iter": 4,
+        "limite_qualidade": 0.9
+      }
+    },
+    "hypothesis_testing": {
+      "plugin": "HypothesisTestingPlugin",
+      "description": "Hypothesis Testing Prompting - Testa hipóteses para cada categoria NIST sistematicamente",
+      "default_params": {
+        "max_iter": 12,
+        "limite_qualidade": 0.9
+      }
+    }
+  },
+  "nist_categories": {
+    "enabled": true,
+    "categories": {
+      "CAT1": {
+        "name": "Account Compromise",
+        "description": "unauthorized access to user or administrator accounts",
+        "examples": ["credential phishing", "SSH brute force", "OAuth token theft"]
+      },
+      "CAT2": {
+        "name": "Malware",
+        "description": "infection by malicious code",
+        "examples": ["ransomware", "Trojan horse", "macro virus"]
+      },
+      "CAT3": {
+        "name": "Denial of Service Attack",
+        "description": "making systems unavailable",
+        "examples": ["volumetric DoS or DDoS (UDP flood, SYN flood, HTTP, HTTPS)", "attack on publicly available APIs", "botnet Mirai attacking server"]
+      },
+      "CAT4": {
+        "name": "Data Leak",
+        "description": "unauthorized disclosure of sensitive data",
+        "examples": ["database theft", "leaked credentials"]
+      },
+      "CAT5": {
+        "name": "Vulnerability Exploitation",
+        "description": "using technical flaws for attacks",
+        "examples": ["exploitation of critical CVE", "remote code execution (RCE)", "SQL injection in web applications"]
+      },
+      "CAT6": {
+        "name": "Insider Abuse",
+        "description": "malicious actions by internal users",
+        "examples": ["copying confidential data", "sabotage"]
+      },
+      "CAT7": {
+        "name": "Social Engineering",
+        "description": "deception to gain access or data",
+        "examples": ["phishing", "vishing", "CEO fraud"]
+      },
+      "CAT8": {
+        "name": "Physical Incident",
+        "description": "impact due to unauthorized physical access",
+        "examples": ["laptop theft", "data center break-in"]
+      },
+      "CAT9": {
+        "name": "Unauthorized Modification",
+        "description": "improper changes to systems or data",
+        "examples": ["defacement", "record manipulation"]
+      },
+      "CAT10": {
+        "name": "Misuse of Resources",
+        "description": "unauthorized use for other purposes",
+        "examples": ["cryptocurrency mining", "malware distribution"]
+      },
+      "CAT11": {
+        "name": "Third-Party Issues",
+        "description": "security failures by suppliers",
+        "examples": ["SaaS breach", "supply chain attack"]
+      },
+      "CAT12": {
+        "name": "Intrusion Attempt",
+        "description": "unconfirmed attacks",
+        "examples": ["network scans", "brute force", "blocked exploits"]
+      }
+    }
+  },
+  "output": {
+    "formats": ["csv", "json", "xlsx"],
+    "default_format": "csv",
+    "include_metadata": true,
+    "include_timestamps": true
+  },
+  "performance": {
+    "rate_limiting": {
+      "api_models": 1.5,
+      "local_models": 0.5
+    },
+    "memory_monitoring": true,
+    "token_tracking": true
+  }
+}

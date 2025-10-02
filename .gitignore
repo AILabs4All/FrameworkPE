@@ -24,7 +24,6 @@ htmlcov/
 env
 .ipynb
 logs/*
-config/default_config.json
 somente_incidentes_194.xlsx
 analise_humano_194_concatenados.xlsx
 resultados_ollama_deepseek_15b_self_hint.xlsx
