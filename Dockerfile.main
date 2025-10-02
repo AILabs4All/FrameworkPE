@@ -1,7 +1,6 @@
-# Dockerfile otimizado para execução de experimentos main.py
-FROM python:3.11-slim
+FROM python:3.11-bookworm
 
-# Instalar apenas dependências essenciais
+# Instalar apenas dependências essenciais (compiladores já incluídos)
 RUN apt-get update && apt-get install -y \
     curl \
     jq \
