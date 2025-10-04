@@ -40,3 +40,216 @@ Resultado da CISCO
 
 ./run-main-experiment.sh --single ollama_deepseek_15b progressive_hint
 python3 main.py data/ --columns "target" --model ollama_deepseek_15b --technique progressive_hint
+
+
+
+python3 main.py data/ --columns "target" --model ollama_deepseek_15b --technique progressive_hint:
+ esse é um comando python que eu rodei para rodar o modelo deepseek "deepseek-r1:1.5b" e a técnica de prompt progressive_hint.
+
+ Faça um script python que automatize rodar para modelos e técnica de prompt.
+ para lista de modelos abaixo :
+     "ollama_qwen3_1_7b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "qwen3:1.7b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_qwen3_4b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "qwen3:4b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_qwen3_8b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "qwen3:8b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_llama3_1_8b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "llama3.1:8b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_llama3_2_1b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "llama3.2:1b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_llama3_2_3b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "llama3.2:3b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_deepseek_r1_7b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "deepseek-r1:7b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_deepseek_r1_8b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "deepseek-r1:8b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_deepseek_r1_14b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "deepseek-r1:14b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_mistral_7b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "mistral:7b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_phi3_3_8b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "phi3:3.8b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_phi3_14b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "phi3:14b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_smollm2_135m": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "smollm2:135m",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_smollm2_360m": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "smollm2:360m",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_smollm2_1_7b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "smollm2:1.7b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_falcon3_1b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "falcon3:1b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_falcon3_3b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "falcon3:3b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_falcon3_7b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "falcon3:7b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_falcon3_10b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "falcon3:10b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_gemma3_270m": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "gemma3:270m",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_gemma3_1b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "gemma3:1b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_gemma3_4b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "gemma3:4b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_gemma3_12b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "gemma3:12b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_granite3_2_2b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "granite3.2:2b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_granite3_2_8b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "granite3.2:8b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    }
+
+
+    rode as quatros técnica de promtp para cada 1.
+    ante de rodar verifique se o modelo está baixo na máquina, senão rode o comando abaixo: docker exec ollama ollama pull deepseek-r1:1.5b
+    só mudando o nome do modelo que vai ser executado
