@@ -3,7 +3,13 @@ which jq
 sudo apt-get update && sudo apt-get install -y jq
 ./script.sh
 
+
 baixar um modelo com ollma: docker exec -it ollama ollama run deepseek-r1:1.5b
+docker exec -it ollama ollama pull deepseek-r1:1.5b
+docker exec ollama ollama pull deepseek-r1:1.5b
+
+
+
 ssh -i ~/.ssh/id_ed25519_gefte_deeppurple -p 22 gefte@200.132.136.80
 
 
@@ -13,3 +19,24 @@ ajudar a validar o PRP
 Rodar 1 vez os experimentos, sequencial.
 Monitorar e paralelizar.
 Resultado da CISCO
+
+
+
+# Ver modelos disponíveis
+./run-main-experiment.sh --list-models
+
+# Simular experimento (dry-run)
+./run-main-experiment.sh --dry-run
+
+# Experimento específico
+./run-main-experiment.sh --single ollama_mistral_7b progressive_hint
+
+# Experimento completo (108 classificações)
+./run-main-experiment.sh --full
+
+
+
+./run-main-experiment.sh --single deepseek-r1:1.5b progressive_hint
+
+./run-main-experiment.sh --single ollama_deepseek_15b progressive_hint
+python3 main.py data/ --columns "target" --model ollama_deepseek_15b --technique progressive_hint
