@@ -1,5 +1,3 @@
-logs/*
-results/*
 __pycache__/
 *.pyc
 .env
@@ -23,8 +21,8 @@ htmlcov/
 .ipynb_checkpoints/
 env
 .ipynb
-logs/*
 somente_incidentes_194.xlsx
 analise_humano_194_concatenados.xlsx
 resultados_ollama_deepseek_15b_self_hint.xlsx
 resultados_ollama_deepseek_15b_self_hint.csv
+194_incidentes.csv

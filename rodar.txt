@@ -2,3 +2,14 @@ chmod +x script.sh
 which jq
 sudo apt-get update && sudo apt-get install -y jq
 ./script.sh
+
+baixar um modelo com ollma: docker exec -it ollama ollama run deepseek-r1:1.5b
+ssh -i ~/.ssh/id_ed25519_gefte_deeppurple -p 22 gefte@200.132.136.80
+
+
+scp -i ~/.ssh/id_ed25519_gefte_deeppurple -P 22 gefte@200.132.136.80:/home/gefte/FrameworkPE/logs/2025-10-02_deepseek-r1:1.5b_php.json  /home/magalu/Área de Trabalho/unipampa/security-incident-framework
+monitorar a execução dos modelos, memórias.
+ajudar a validar o PRP
+Rodar 1 vez os experimentos, sequencial.
+Monitorar e paralelizar.
+Resultado da CISCO
