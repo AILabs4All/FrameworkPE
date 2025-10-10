@@ -8,7 +8,8 @@ baixar um modelo com ollma: docker exec -it ollama ollama run deepseek-r1:1.5b
 docker exec -it ollama ollama pull deepseek-r1:1.5b
 docker exec ollama ollama pull deepseek-r1:1.5b
 
-
+docker exec ollama ollama pull phi3:3.8b
+docker exec ollama ollama pul smollm2:360m
 
 ssh -i ~/.ssh/id_ed25519_gefte_deeppurple -p 22 gefte@200.132.136.80
 
@@ -253,3 +254,12 @@ python3 main.py data/ --columns "target" --model ollama_deepseek_15b --technique
     rode as quatros técnica de promtp para cada 1.
     ante de rodar verifique se o modelo está baixo na máquina, senão rode o comando abaixo: docker exec ollama ollama pull deepseek-r1:1.5b
     só mudando o nome do modelo que vai ser executado
+
+
+
+
+python3 main.py data/ --columns "target" --model ollama_smollm2_360m --technique progressive_hint &
+python3 main.py data/ --columns "target" --model ollama_smollm2_360m --technique self_hint &
+python3 main.py data/ --columns "target" --model ollama_smollm2_360m --technique progressive_rectification &
+python3 main.py data/ --columns "target" --model ollama_smollm2_360m --technique hypothesis_testing
+wait
