@@ -44,7 +44,7 @@ O **Security Incident Classification Framework** é uma solução robusta e exte
 ### Instalação Rápida
 ```bash
 # Clone o repositório
-git clone <repository-url>
+git clone https://github.com/AILabs4All/FrameworkPE.git
 cd security-incident-framework
 
 # Instale dependências

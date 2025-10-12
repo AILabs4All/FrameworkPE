@@ -1,0 +1,5 @@
+python3 main.py data/ --columns "target" --model foundation_sec --technique progressive_hint &
+python3 main.py data/ --columns "target" --model foundation_sec --technique self_hint &
+python3 main.py data/ --columns "target" --model foundation_sec --technique progressive_rectification &
+python3 main.py data/ --columns "target" --model foundation_sec --technique hypothesis_testing
+wait

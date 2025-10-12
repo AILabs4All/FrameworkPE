@@ -4,6 +4,7 @@ from utils.logger import setup_logger
 # Importa os plugins de modelo
 from plugins.models.api_model import APIModel
 from plugins.models.local_model import LocalModel
+from plugins.models.hungguiface_model import HuggingfaceModel
 try:
     from plugins.models.mock_model import MockModel
     MOCK_AVAILABLE = True
@@ -30,6 +31,7 @@ class PluginManager:
         # Registra plugins de modelo
         self.register_model_plugin("APIModel", APIModel)
         self.register_model_plugin("LocalModel", LocalModel)
+        self.register_model_plugin("HuggingfaceModel", HuggingfaceModel)
         if MOCK_AVAILABLE:
             self.register_model_plugin("MockModel", MockModel)
         
