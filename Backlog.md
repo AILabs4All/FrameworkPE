@@ -1,0 +1,12 @@
+| Data       | Tarefa                                                                                                                                                               | Responsável(es) | Observações |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | ----------- |
+| 10/10/2025 | Olhar a janela de contexto da SLM                                                                                                                                    | Gefte           |             |
+| 10/10/2025 | Olhar para o texto do prompt                                                                                                                                         | Alex            |             |
+| 10/10/2025 | Experimento de vulnerabilidades, definir os parâmetros para criar o teste. Mapear as tabelas de vulnerabilidades para a classificação. A tabela do CWE, tabela OWASP | Gefté           |             |
+| 10/10/2025 | Verificar se a CISCO 8B é boa para classificar vulnerabilidades                                                                                                      | Gefté, Douglas  |             |
+| 10/10/2025 | Definir um prompt livre                                                                                                                                              | Douglas, Gefte  |             |
+| 10/10/2025 | Definir um backlog.md, para organizar as tarefas                                                                                                                     | Gefte           |             |
+| 10/10/2025 | Analisar o resultados dos dados da parte 1 do experimentos paper                                                                                                     | Alex            |             |
+| 10/10/2025 | Rodar com um set menor de incidentes                                                                                                                                 | Gefté           |             |
+| 10/10/2025 | Definir um script para automatizar a analise                                                                                                                         | Gefté           |             |
+| 10/10/2025 | Gerar um relatório do resultados                                                                                                                                     | Gefté           |             |
