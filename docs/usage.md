@@ -545,7 +545,7 @@ MODEL="openai_gpt4"
 mkdir -p "${OUTPUT_DIR}"
 
 # Técnicas a comparar
-techniques=("progressive_hint" "self_hint" "progressive_rectification" "hypothesis_testing")
+techniques=("progressive_hint" "self_hint" "progressive_rectification" "hypothesis_testing" "free_prompt")
 
 for technique in "${techniques[@]}"; do
   echo "=== Testando técnica: ${technique} ==="

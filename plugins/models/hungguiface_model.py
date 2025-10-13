@@ -16,7 +16,7 @@ class HuggingfaceModel(BaseModel):
     def __init__(self, config: Dict[str, Any]):
         self.tokenizer: Optional[AutoTokenizer] = None
         self.model: Optional[AutoModelForCausalLM] = None
-        self.device: str = "cpu"
+        self.device: str = "cuda" if torch.cuda.is_available() else "cpu"
         super().__init__(config)
 
     def setup_model(self) -> None:

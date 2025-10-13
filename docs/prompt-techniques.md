@@ -576,7 +576,7 @@ O framework inclui ferramentas para comparar técnicas:
 ```bash
 python scripts/evaluate_techniques.py \
   --data data/test_incidents.csv \
-  --techniques progressive_hint,self_hint,hypothesis_testing \
+  --techniques progressive_hint,self_hint,hypothesis_testing,free_prompt \
   --models openai_gpt4,ollama_deepseek \
   --output evaluation_report.html
 ```

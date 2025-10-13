@@ -241,8 +241,8 @@
       "provider": "huggingface",
       "model": "fdtn-ai/Foundation-Sec-8B",
       "model_path": "fdtn-ai/Foundation-Sec-8B",
-      "temperature": 0.1,
-      "max_tokens": 50,
+      "temperature": 0.9,
+      "max_tokens": 2000,
       "device": "auto",
       "load_config": {
         "model": {
@@ -286,6 +286,16 @@
       "default_params": {
         "max_iter": 12,
         "limite_qualidade": 0.9
+      }
+    },
+    "free_prompt": {
+      "plugin": "FreePromptPlugin",
+      "description": "Free Prompting - Técnica de prompt direto e flexível sem modificações complexas",
+      "default_params": {
+        "use_examples": true,
+        "use_structured_output": true,
+        "use_context_hints": false,
+        "temperature_override": null
       }
     }
   },

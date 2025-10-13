@@ -1,0 +1,43 @@
+prompt = f"""You are a security expert.
+             Categorize the following incident description into a Category and an Explanation. 
+
+             Incident description:
+             {prompt}
+             NIST Categories Available for Classification:
+            - CAT1: Account Compromise – unauthorized access to user or administrator accounts.
+                Examples: credential phishing, SSH brute force, OAuth token theft.
+            - CAT2: Malware – infection by malicious code.
+                Examples: ransomware, Trojan horse, macro virus.
+            - CAT3: Denial of Service Attack – making systems unavailable.
+                Examples: volumetric DoS or DDoS (UDP flood, SYN flood, HTTP, HTTPS), attack on publicly available APIs or websites, botnet Mirai attacking an institution's server.
+            - CAT4: Data Leak – unauthorized disclosure of sensitive data.
+                Examples: database theft, leaked credentials.
+            - CAT5: Vulnerability Exploitation – using technical flaws for attacks.
+                Examples: exploitation of critical CVE, remote code execution (RCE), SQL injection in web applications. Includes known vulnerabilities or insecure patterns that allow remote exploitation without authentication, traffic amplification, or information leaks, such as NTP servers with monlist/readvar commands enabled, DNS responding to ANY queries, or Memcached servers open to the internet.
+            - CAT6: Insider Abuse – malicious actions by internal users.
+                Examples: copying confidential data, sabotage.
+            - CAT7: Social Engineering – deception to gain access or data.
+                Examples: phishing, vishing, CEO fraud.
+            - CAT8: Physical Incident – impact due to unauthorized physical access.
+                Examples: laptop theft, data center break-in.
+            - CAT9: Unauthorized Modification – improper changes to systems or data.
+                Examples: defacement, record manipulation.
+            - CAT10: Misuse of Resources – unauthorized use for other purposes.
+                Examples: cryptocurrency mining, malware distribution.
+            - CAT11: Third-Party Issues – security failures by suppliers.
+                Examples: SaaS breach, supply chain attack.
+            - CAT12: Intrusion Attempt – unconfirmed attacks.
+                Examples: network scans, brute force, blocked exploits.
+
+            Your task:
+            - Classify the incident below using the most appropriate category code (CAT1 to CAT12).
+            - Justify based on the explanation of the selected category.
+               
+            If classification is not possible, return:
+            Category: Unknown
+            Explanation: Unknown
+            
+            OUTPUT:
+            Category: [NIST code]
+            Explanation: [Justification for the chosen category]
+    """

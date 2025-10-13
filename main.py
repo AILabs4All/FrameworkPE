@@ -61,7 +61,7 @@ Compatibilidade com versões anteriores:
     technique_group = parser.add_mutually_exclusive_group()
     technique_group.add_argument('--technique',
                                 choices=['progressive_hint', 'progressive_rectification',
-                                        'self_hint', 'hypothesis_testing'],
+                                        'self_hint', 'hypothesis_testing', 'free_prompt'],
                                 default='progressive_hint',
                                 help="Técnica de prompt a usar")
     technique_group.add_argument('--mode',  # Para compatibilidade
