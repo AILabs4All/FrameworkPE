@@ -236,6 +236,14 @@
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
+    "ollama_fundation_sec_8b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "huihui_ai/foundation-sec-abliterated:8b",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
     "foundation_sec": {
       "plugin": "HuggingfaceModel",
       "provider": "huggingface",
