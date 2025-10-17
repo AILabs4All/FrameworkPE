@@ -160,7 +160,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "falcon3:1b",
-      "temperature": 0.7,
+      "temperature": 0.9,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -168,7 +168,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "falcon3:3b",
-      "temperature": 0.7,
+      "temperature": 0.9,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -176,7 +176,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "falcon3:7b",
-      "temperature": 0.7,
+      "temperature": 0.9,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -184,7 +184,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "falcon3:10b",
-      "temperature": 0.7,
+      "temperature": 0.9,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -192,7 +192,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "gemma3:270m",
-      "temperature": 0.7,
+      "temperature": 0.9,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -200,7 +200,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "gemma3:1b",
-      "temperature": 0.7,
+      "temperature": 0.9,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -208,7 +208,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "gemma3:4b",
-      "temperature": 0.7,
+      "temperature": 0.9,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -216,7 +216,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "gemma3:12b",
-      "temperature": 0.7,
+      "temperature": 0.9,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
