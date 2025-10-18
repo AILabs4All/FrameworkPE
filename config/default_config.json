@@ -104,7 +104,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "deepseek-r1:14b",
-      "temperature": 0.7,
+      "temperature": 0.9,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -112,7 +112,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "mistral:7b",
-      "temperature": 0.7,
+      "temperature": 0.9,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -224,7 +224,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "granite3.2:2b",
-      "temperature": 0.7,
+      "temperature": 0.9,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -232,7 +232,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "granite3.2:8b",
-      "temperature": 0.7,
+      "temperature": 0.9,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },

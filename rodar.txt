@@ -26,6 +26,17 @@ docker exec ollama ollama pull falcon3:10b
 docker exec ollama ollama pull falcon3:7b
 docker exec ollama ollama pull falcon3:3b
 docker exec ollama ollama pull falcon3:1b
+granite3.2:8b
+granite3.2:2b
+mistral:7b
+deepseek-r1:7b
+deepseek-r1:8b
+deepseek-r1:14b
+mistral:7b
+
+
+
+
 
 ssh -i ~/.ssh/id_ed25519_gefte_deeppurple -p 22 gefte@200.132.136.80
 
@@ -144,6 +155,7 @@ python3 main.py data/ --columns "target" --model ollama_falcon3_7b --technique s
 python3 main.py data/ --columns "target" --model ollama_falcon3_7b --technique progressive_hint --output 'xlsx'
 python3 main.py data/ --columns "target" --model ollama_falcon3_7b --technique progressive_rectification --output 'xlsx'
 python3 main.py data/ --columns "target" --model ollama_falcon3_7b --technique hypothesis_testing --output 'xlsx'
+
 python3 main.py data/ --columns "target" --model ollama_falcon3_10b --technique free_prompt --output 'xlsx'
 python3 main.py data/ --columns "target" --model ollama_falcon3_10b --technique self_hint --output 'xlsx'
 python3 main.py data/ --columns "target" --model ollama_falcon3_10b --technique progressive_hint --output 'xlsx'
