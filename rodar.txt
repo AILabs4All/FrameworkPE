@@ -26,13 +26,20 @@ docker exec ollama ollama pull falcon3:10b
 docker exec ollama ollama pull falcon3:7b
 docker exec ollama ollama pull falcon3:3b
 docker exec ollama ollama pull falcon3:1b
-granite3.2:8b
-granite3.2:2b
-mistral:7b
-deepseek-r1:7b
-deepseek-r1:8b
-deepseek-r1:14b
-mistral:7b
+
+docker exec ollama ollama pull granite3.2:8b
+docker exec ollama ollama pull granite3.2:2b
+docker exec ollama ollama pull mistral:7b
+docker exec ollama ollama pull deepseek-r1:7b
+docker exec ollama ollama pull deepseek-r1:8b
+docker exec ollama ollama pull deepseek-r1:14b
+docker exec ollama ollama pull mistral:7b
+docker exec ollama ollama pull phi3:3.8b
+docker exec ollama ollama pull phi3:14b
+docker exec ollama ollama pull smollm2:135m
+docker exec ollama ollama pull smollm2:360m
+docker exec ollama ollama pull smollm2:1.7b
+
 
 
 
