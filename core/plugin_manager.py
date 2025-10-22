@@ -17,6 +17,7 @@ from plugins.prompts.self_hint import SelfHintPlugin
 from plugins.prompts.progressive_rectification import ProgressiveRectificationPlugin
 from plugins.prompts.hypothesis_testing import HypothesisTestingPlugin
 from plugins.prompts.free_prompt import FreePromptPlugin
+from plugins.prompts.zeroshot_b import ZeroShotPlugin
 
 class PluginManager:
     """Gerenciador de plugins do framework."""
@@ -42,6 +43,7 @@ class PluginManager:
         self.register_prompt_plugin("ProgressiveRectificationPlugin", ProgressiveRectificationPlugin)
         self.register_prompt_plugin("HypothesisTestingPlugin", HypothesisTestingPlugin)
         self.register_prompt_plugin("FreePromptPlugin", FreePromptPlugin)
+        self.register_prompt_plugin("ZeroShotPlugin", ZeroShotPlugin)
         
         self.logger.info(
             "Plugins registrados: %d modelos, %d técnicas de prompt",

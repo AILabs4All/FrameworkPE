@@ -305,6 +305,11 @@
         "use_context_hints": false,
         "temperature_override": null
       }
+    },
+    "zeroshot": {
+      "plugin": "ZeroShotPlugin",
+      "description": "Zero-Shot Prompting - Técnica de prompt direto sem exemplos, apenas com definições de categorias",
+      "default_params": {}
     }
   },
   "nist_categories": {

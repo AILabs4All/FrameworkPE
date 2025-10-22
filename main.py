@@ -37,6 +37,7 @@ Técnicas disponíveis:
   - progressive_rectification: Progressive Rectification  
   - self_hint: Self Hint Prompting
   - hypothesis_testing: Hypothesis Testing
+  - zeroshot: Zero-Shot Prompting
   
 Compatibilidade com versões anteriores:
   --mode php é equivalente a --technique progressive_hint
@@ -61,7 +62,7 @@ Compatibilidade com versões anteriores:
     technique_group = parser.add_mutually_exclusive_group()
     technique_group.add_argument('--technique',
                                 choices=['progressive_hint', 'progressive_rectification',
-                                        'self_hint', 'hypothesis_testing', 'free_prompt'],
+                                        'self_hint', 'hypothesis_testing', 'free_prompt', 'zeroshot'],
                                 default='progressive_hint',
                                 help="Técnica de prompt a usar")
     technique_group.add_argument('--mode',  # Para compatibilidade
