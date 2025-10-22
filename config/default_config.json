@@ -15,7 +15,7 @@
       "plugin": "APIModel",
       "provider": "openai",
       "model": "gpt-4",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "api_key": "${OPENAI_API_KEY}",
       "base_url": null
@@ -24,7 +24,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "deepseek-r1:1.5b",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -32,7 +32,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "qwen3:0.6b",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -40,7 +40,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "qwen3:1.7b",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -48,7 +48,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "qwen3:4b",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -56,7 +56,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "qwen3:8b",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -64,7 +64,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "llama3.1:8b",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -72,7 +72,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "llama3.2:1b",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -80,7 +80,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "llama3.2:3b",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -88,7 +88,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "deepseek-r1:7b",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -96,7 +96,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "deepseek-r1:8b",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -104,7 +104,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "deepseek-r1:14b",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -112,7 +112,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "mistral:7b",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -120,7 +120,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "phi3:3.8b",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -128,7 +128,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "phi3:14b",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -136,7 +136,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "smollm2:135m",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -152,7 +152,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "smollm2:1.7b",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -160,7 +160,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "falcon3:1b",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -168,7 +168,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "falcon3:3b",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -176,7 +176,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "falcon3:7b",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -184,7 +184,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "falcon3:10b",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -192,7 +192,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "gemma3:270m",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -200,7 +200,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "gemma3:1b",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -208,7 +208,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "gemma3:4b",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -216,7 +216,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "gemma3:12b",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -224,7 +224,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "granite3.2:2b",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -232,7 +232,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "granite3.2:8b",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -240,7 +240,7 @@
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "huihui_ai/foundation-sec-abliterated:8b",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
@@ -249,7 +249,7 @@
       "provider": "huggingface",
       "model": "fdtn-ai/Foundation-Sec-8B",
       "model_path": "fdtn-ai/Foundation-Sec-8B",
-      "temperature": 0.9,
+      "temperature": 0.2,
       "max_tokens": 2000,
       "device": "auto",
       "load_config": {
@@ -269,7 +269,7 @@
       "description": "Progressive Hint Prompting - Gera dicas progressivas para melhorar a classificação",
       "default_params": {
         "max_hints": 4,
-        "limite_rouge": 0.9
+        "limite_rouge": 0.2
       }
     },
     "self_hint": {
@@ -277,7 +277,7 @@
       "description": "Self Hint Prompting - O modelo gera seu próprio plano e se auto-refina",
       "default_params": {
         "max_iter": 4,
-        "limite_qualidade": 0.9
+        "limite_qualidade": 0.2
       }
     },
     "progressive_rectification": {
@@ -285,7 +285,7 @@
       "description": "Progressive Rectification Prompting - Valida e retifica respostas usando mascaramento",
       "default_params": {
         "max_iter": 4,
-        "limite_qualidade": 0.9
+        "limite_qualidade": 0.2
       }
     },
     "hypothesis_testing": {
@@ -293,7 +293,7 @@
       "description": "Hypothesis Testing Prompting - Testa hipóteses para cada categoria NIST sistematicamente",
       "default_params": {
         "max_iter": 12,
-        "limite_qualidade": 0.9
+        "limite_qualidade": 0.2
       }
     },
     "free_prompt": {
