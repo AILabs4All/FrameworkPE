@@ -16,17 +16,14 @@ docker exec ollama ollama pull huihui_ai/foundation-sec-abliterated:8b
 docker exec ollama ollama pull qwen3:4b
 docker exec ollama ollama pull qwen3:8b
 docker exec ollama ollama pull qwen3:1.7b
-
 docker exec ollama ollama pull gemma3:270m
 docker exec ollama ollama pull gemma3:1b
 docker exec ollama ollama pull gemma3:4b
 docker exec ollama ollama pull gemma3:12b
-
 docker exec ollama ollama pull falcon3:10b
 docker exec ollama ollama pull falcon3:7b
 docker exec ollama ollama pull falcon3:3b
 docker exec ollama ollama pull falcon3:1b
-
 docker exec ollama ollama pull granite3.2:8b
 docker exec ollama ollama pull granite3.2:2b
 docker exec ollama ollama pull mistral:7b
@@ -39,7 +36,16 @@ docker exec ollama ollama pull phi3:14b
 docker exec ollama ollama pull smollm2:135m
 docker exec ollama ollama pull smollm2:360m
 docker exec ollama ollama pull smollm2:1.7b
-
+docker exec ollama ollama pull gpt-oss:20b
+docker exec ollama ollama pull deepseek-r1:32b
+docker exec ollama ollama pull gemma3:27b
+docker exec ollama ollama pull qwen3:32b
+docker exec ollama ollama pull qwen3:30b
+docker exec ollama ollama pull qwen3:14b
+docker exec ollama ollama pull qwen3:0.6b
+docker exec ollama ollama pull phi4:14b
+docker exec ollama ollama pull smollm:135m
+docker exec ollama ollama pull smollm:360m
 
 
 
@@ -191,28 +197,26 @@ python3 main.py data/ --columns "target" --model ollama_qwen3_1_7b --technique h
 wait
 
 
-python3 main.py data/ --columns "target" --model ollama_gemma3_270m --technique zeroshot --output 'xlsx'
+
 
 
 python3 main.py data/ --columns "target" --model openai_gpt4 --technique zeroshot --output 'xlsx'
 python3 main.py data/ --columns "target" --model ollama_deepseek_15b --technique zeroshot --output 'xlsx'
-python3 main.py data/ --columns "target" --model ollama_qwen3_0_6b --technique zeroshot --output 'xlsx'
+
 python3 main.py data/ --columns "target" --model ollama_qwen3_1_7b --technique zeroshot --output 'xlsx'
 python3 main.py data/ --columns "target" --model ollama_qwen3_4b --technique zeroshot --output 'xlsx'
 python3 main.py data/ --columns "target" --model ollama_qwen3_8b --technique zeroshot --output 'xlsx'
 python3 main.py data/ --columns "target" --model ollama_llama3_1_8b --technique zeroshot --output 'xlsx'
-python3 main.py data/ --columns "target" --model ollama_llama3_2_1b --technique zeroshot --output 'xlsx'
-python3 main.py data/ --columns "target" --model ollama_llama3_2_3b --technique zeroshot --output 'xlsx'
+
 python3 main.py data/ --columns "target" --model ollama_deepseek_r1_7b --technique zeroshot --output 'xlsx'
 python3 main.py data/ --columns "target" --model ollama_deepseek_r1_8b --technique zeroshot --output 'xlsx'
 python3 main.py data/ --columns "target" --model ollama_deepseek_r1_14b --technique zeroshot --output 'xlsx'
 python3 main.py data/ --columns "target" --model ollama_mistral_7b --technique zeroshot --output 'xlsx'
-python3 main.py data/ --columns "target" --model ollama_phi3_3_8b --technique zeroshot --output 'xlsx'
+
 python3 main.py data/ --columns "target" --model ollama_phi3_14b --technique zeroshot --output 'xlsx'
-python3 main.py data/ --columns "target" --model ollama_smollm2_135m --technique zeroshot --output 'xlsx'
-python3 main.py data/ --columns "target" --model ollama_smollm2_360m --technique zeroshot --output 'xlsx'
+
 python3 main.py data/ --columns "target" --model ollama_smollm2_1_7b --technique zeroshot --output 'xlsx'
-python3 main.py data/ --columns "target" --model ollama_falcon3_1b --technique zeroshot --output 'xlsx'
+
 python3 main.py data/ --columns "target" --model ollama_falcon3_3b --technique zeroshot --output 'xlsx'
 python3 main.py data/ --columns "target" --model ollama_falcon3_7b --technique zeroshot --output 'xlsx'
 python3 main.py data/ --columns "target" --model ollama_falcon3_10b --technique zeroshot --output 'xlsx'
@@ -220,7 +224,7 @@ python3 main.py data/ --columns "target" --model ollama_gemma3_270m --technique 
 python3 main.py data/ --columns "target" --model ollama_gemma3_1b --technique zeroshot --output 'xlsx'
 python3 main.py data/ --columns "target" --model ollama_gemma3_4b --technique zeroshot --output 'xlsx'
 python3 main.py data/ --columns "target" --model ollama_gemma3_12b --technique zeroshot --output 'xlsx'
-python3 main.py data/ --columns "target" --model ollama_granite3_2_2b --technique zeroshot --output 'xlsx'
+
 python3 main.py data/ --columns "target" --model ollama_granite3_2_8b --technique zeroshot --output 'xlsx'
 python3 main.py data/ --columns "target" --model ollama_fundation_sec_8b --technique zeroshot --output 'xlsx'
 python3 main.py data/ --columns "target" --model foundation_sec --technique zeroshot --output 'xlsx'
@@ -228,68 +232,33 @@ python3 main.py data/ --columns "target" --model foundation_sec --technique zero
 
 
 
+python3 main.py data/ --columns "target" --model ollama_qwen3_0_6b --technique zeroshot --output 'xlsx'
+python3 main.py data/ --columns "target" --model ollama_phi3_3_8b --technique zeroshot --output 'xlsx'
+python3 main.py data/ --columns "target" --model ollama_smollm2_135m --technique zeroshot --output 'xlsx'
+python3 main.py data/ --columns "target" --model ollama_smollm2_360m --technique zeroshot --output 'xlsx'
+python3 main.py data/ --columns "target" --model ollama_falcon3_1b --technique zeroshot --output 'xlsx'
+python3 main.py data/ --columns "target" --model ollama_llama3_2_1b --technique zeroshot --output 'xlsx'
+python3 main.py data/ --columns "target" --model ollama_llama3_2_3b --technique zeroshot --output 'xlsx'
+python3 main.py data/ --columns "target" --model ollama_gemma3_270m --technique zeroshot --output 'xlsx'
+python3 main.py data/ --columns "target" --model ollama_granite3_2_2b --technique zeroshot --output 'xlsx'
+python3 main.py data/ --columns "target" --model ollama_gpt_oss_20b --technique zeroshot --output 'xlsx'
+python3 main.py data/ --columns "target" --model ollama_deepseek_r1_32b --technique zeroshot --output 'xlsx'
+python3 main.py data/ --columns "target" --model ollama_gemma3_27b --technique zeroshot --output 'xlsx'
+python3 main.py data/ --columns "target" --model ollama_qwen3_14b --technique zeroshot --output 'xlsx'
+python3 main.py data/ --columns "target" --model ollama_qwen3_30b --technique zeroshot --output 'xlsx'
+python3 main.py data/ --columns "target" --model ollama_qwen3_32b --technique zeroshot --output 'xlsx'
+python3 main.py data/ --columns "target" --model ollama_phi4_14b --technique zeroshot --output 'xlsx'
+python3 main.py data/ --columns "target" --model ollama_smollm_135m --technique zeroshot --output 'xlsx'
+python3 main.py data/ --columns "target" --model ollama_smollm_360m --technique zeroshot --output 'xlsx'
 
-[DATE_TIME_a989e9db40] 14:47 CERT.br: 
-Data de envio: Nov 18, 2022 2:45 PM
-Para: [EMAIL_ADDRESS_340a71a13b], [EMAIL_ADDRESS_f6f7086365], [EMAIL_ADDRESS_a0a85d701e]
-CC: [EMAIL_ADDRESS_83824c64b2]
-Assunto: Re: Abuse from [IP_ADDRESS_32a64212fc]
 
-Hello,
-
-CERT.br works as a coordinating team for incidents and abuses related
-to Brazilian networks. We are listed in the "remarks" notes of the
-Brazilian Whois Server output to receive copies of complaints, but we
-are not the technical or abuse contact of any network.
-
-We are forwarding your email to the proper contacts for this network
-so they can handle this incident.
-
-Original message was attached to this email.
-
-Thank you for reporting this incident,
---
-CERT.br/NIC.br
-<[EMAIL_ADDRESS_83824c64b2]>
-[URL_ea4f5d47bf]
-
-=======================================================================
------ Original message as text -----
-From: [EMAIL_ADDRESS_340a71a13b]
-To: [EMAIL_ADDRESS_c4122f8a60],[EMAIL_ADDRESS_83824c64b2]
-Cc: [EMAIL_ADDRESS_340a71a13b]
-Subject: Abuse from [IP_ADDRESS_32a64212fc]
-Date: Fri, 18 Nov 2022 18:32:09 +0100 (CET)
-Message-ID: <[EMAIL_ADDRESS_9006ffa082]>
-
-Dear Sir/Madam,
-
-We have detected abuse from the IP address [IP_ADDRESS_32a64212fc], which according to a whois lookup is on your network. We would appreciate if you would investigate and take action as appropriate.
-
-Log lines are given below, but please ask if you require any further information.
-
-(If you are not the correct person to contact about this please accept our apologies - your e-mail address was extracted from the whois record by an automated process. This mail was generated by Fail2Ban.)
-
-Note: Local timezone is +0100 (CET)
-Nov 13 13:48:05 server sshd[4430]: Invalid user test5 from [IP_ADDRESS_32a64212fc]
-Nov 13 13:48:05 server sshd[4430]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=[IP_ADDRESS_32a64212fc] 
-Nov 13 13:48:07 server sshd[4430]: Failed password for invalid user test5 from [IP_ADDRESS_32a64212fc] port 47758 ssh2
-Nov 13 13:48:07 server sshd[4430]: Received disconnect from [IP_ADDRESS_32a64212fc]: 11: Bye Bye [preauth]
-Nov 13 13:54:10 server sshd[5671]: Invalid user rundeck from [IP_ADDRESS_32a64212fc]
-Nov 13 13:54:10 server sshd[5671]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=[IP_ADDRESS_32a64212fc] 
-Nov 13 13:54:12 server sshd[5671]: Failed password for invalid user rundeck from [IP_ADDRESS_32a64212fc] port 43934 ssh2
-Nov 13 13:54:12 server sshd[5671]: Received disconnect from [IP_ADDRESS_32a64212fc]: 11: Bye Bye [preauth]
-Nov 13 13:55:23 server sshd[6313]: Invalid user jimmy from [IP_ADDRESS_32a64212fc]
-Nov 13 13:55:23 server sshd[6313]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=[IP_ADDRESS_32a64212fc] 
-Nov 13 13:55:25 server sshd[6313]: Failed password for invalid user jimmy from [IP_ADDRESS_32a64212fc] port 56258 ssh2
-Nov 13 13:55:25 server sshd[6313]: Received disconnect from [IP_ADDRESS_32a64212fc]: 11: Bye Bye [preauth]
-Nov 18 18:13:42 server sshd[11117]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=[IP_ADDRESS_32a64212fc]  user=root
-Nov 18 18:13:44 server sshd[11117]: Failed password for root from [IP_ADDRESS_32a64212fc] port 45264 ssh2
-Nov 18 18:13:44 server sshd[11117]: Received disconnect from [IP_ADDRESS_32a64212fc]: 11: Bye Bye [preauth]
-Nov 18 18:18:46 server sshd[12088]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=[IP_ADDRESS_32a64212fc]  user=root
-Nov 18 18:18:48 server sshd[12088]: Failed password for root from [IP_ADDRESS_32a64212fc] port 38778 ssh2
-Nov 18 18:18:48 server sshd[12088]: Received disconnect from [IP_ADDRESS_32a64212fc]: 11: Bye Bye [preauth]
-Nov 18 18:20:14 server sshd[12662]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=[IP_ADDRESS_32a64212fc]  user=root
-Nov 18 18:20:16 server sshd[12662]: Failed password for root from [IP_ADDRESS_32a64212fc] port 56312 ssh2
-Nov 18 18:20:16 server sshd[12662]: Received disconnect from [IP_ADDRESS_32a64212fc]: 11: Bye Bye [preauth]
-Nov 18 18:21:47 server sshd[12915]: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=200.132.
+gpt-oss:20b
+deepseek-r1:32b
+gemma3:27b
+qwen3:32b
+qwen3:30b
+qwen3:14b
+qwen3:0.6b
+phi4:14b
+smollm:135m
+smollm:360m

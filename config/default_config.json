@@ -244,6 +244,78 @@
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
+    "ollama_gpt_oss_20b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "gpt-oss:20b",
+      "temperature": 0.2,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_deepseek_r1_32b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "deepseek-r1:32b",
+      "temperature": 0.2,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_gemma3_27b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "gemma3:27b",
+      "temperature": 0.2,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_qwen3_14b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "qwen3:14b",
+      "temperature": 0.2,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_qwen3_30b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "qwen3:30b",
+      "temperature": 0.2,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_qwen3_32b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "qwen3:32b",
+      "temperature": 0.2,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_phi4_14b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "phi4:14b",
+      "temperature": 0.2,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_smollm_135m": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "smollm:135m",
+      "temperature": 0.2,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_smollm_360m": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "smollm:360m",
+      "temperature": 0.2,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
     "foundation_sec": {
       "plugin": "HuggingfaceModel",
       "provider": "huggingface",
