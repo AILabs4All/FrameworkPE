@@ -262,3 +262,8 @@ qwen3:0.6b
 phi4:14b
 smollm:135m
 smollm:360m
+
+
+python3 main.py data/ --columns "target" --model ollama_gpt_oss_20b --technique zeroshot --output 'xlsx'
+python3 main.py data/ --columns "target" --model ollama_gemma3_27b --technique zeroshot --output 'xlsx'
+python3 main.py data/ --columns "target" --model ollama_granite3_2_8b --technique zeroshot --output 'xlsx'
