@@ -267,3 +267,12 @@ smollm:360m
 python3 main.py data/ --columns "target" --model ollama_gpt_oss_20b --technique zeroshot --output 'xlsx'
 python3 main.py data/ --columns "target" --model ollama_gemma3_27b --technique zeroshot --output 'xlsx'
 python3 main.py data/ --columns "target" --model ollama_granite3_2_8b --technique zeroshot --output 'xlsx'
+
+
+### EXPERIMENTO FINAL
+
+python3 main.py data/ --columns "target" --model ollama_mistral_7b --technique zeroshot --output 'xlsx'
+python3 main.py data/ --columns "target" --model ollama_mistral_7b --technique self_hint --output 'xlsx'
+python3 main.py data/ --columns "target" --model ollama_mistral_7b --technique progressive_hint --output 'xlsx'
+python3 main.py data/ --columns "target" --model ollama_mistral_7b --technique progressive_rectification --output 'xlsx'
+python3 main.py data/ --columns "target" --model ollama_mistral_7b --technique hypothesis_testing --output 'xlsx'
