@@ -11,75 +11,42 @@
     "enable_file": true
   },
   "models": {
-    "openai_gpt4": {
-      "plugin": "APIModel",
-      "provider": "openai",
-      "model": "gpt-4",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "api_key": "${OPENAI_API_KEY}",
-      "base_url": null
-    },
-    "ollama_deepseek_15b": {
+    "ollama_mistral_7b": {
       "plugin": "LocalModel",
       "provider": "ollama",
-      "model": "deepseek-r1:1.5b",
+      "model": "mistral:7b",
       "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
-    "ollama_qwen3_0_6b": {
+    "ollama_falcon3_7b": {
       "plugin": "LocalModel",
       "provider": "ollama",
-      "model": "qwen3:0.6b",
+      "model": "falcon3:7b",
       "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
-    "ollama_qwen3_1_7b": {
+    "ollama_falcon3_10b": {
       "plugin": "LocalModel",
       "provider": "ollama",
-      "model": "qwen3:1.7b",
+      "model": "falcon3:10b",
       "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
-    "ollama_qwen3_4b": {
+    "ollama_gpt_oss_20b": {
       "plugin": "LocalModel",
       "provider": "ollama",
-      "model": "qwen3:4b",
+      "model": "gpt-oss:20b",
       "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
-    "ollama_qwen3_8b": {
+    "ollama_phi4_14b": {
       "plugin": "LocalModel",
       "provider": "ollama",
-      "model": "qwen3:8b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_llama3_1_8b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "llama3.1:8b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_llama3_2_1b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "llama3.2:1b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_llama3_2_3b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "llama3.2:3b",
+      "model": "phi4:14b",
       "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
@@ -108,122 +75,10 @@
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
-    "ollama_mistral_7b": {
+    "ollama_gemma2_9b": {
       "plugin": "LocalModel",
       "provider": "ollama",
-      "model": "mistral:7b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_phi3_3_8b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "phi3:3.8b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_phi3_14b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "phi3:14b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_smollm2_135m": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "smollm2:135m",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_smollm2_360m": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "smollm2:360m",
-      "temperature": 0.7,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_smollm2_1_7b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "smollm2:1.7b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_falcon3_1b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "falcon3:1b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_falcon3_3b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "falcon3:3b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_falcon3_7b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "falcon3:7b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_falcon3_10b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "falcon3:10b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_gemma3_270m": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "gemma3:270m",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_gemma3_1b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "gemma3:1b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_gemma3_4b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "gemma3:4b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_gemma3_12b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "gemma3:12b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_granite3_2_2b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "granite3.2:2b",
+      "model": "gemma2:9b",
       "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
@@ -236,7 +91,7 @@
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
-    "ollama_fundation_sec_8b": {
+    "ollama_foundation_sec_8b": {
       "plugin": "LocalModel",
       "provider": "ollama",
       "model": "huihui_ai/foundation-sec-abliterated:8b",
@@ -244,10 +99,10 @@
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
-    "ollama_gpt_oss_20b": {
+    "ollama_llama3_1_8b": {
       "plugin": "LocalModel",
       "provider": "ollama",
-      "model": "gpt-oss:20b",
+      "model": "llama3.1:8b",
       "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
@@ -260,26 +115,34 @@
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
-    "ollama_gemma3_27b": {
+    "ollama_deepseek_r1_70b": {
       "plugin": "LocalModel",
       "provider": "ollama",
-      "model": "gemma3:27b",
+      "model": "deepseek-r1:70b",
       "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
-    "ollama_qwen3_14b": {
+    "ollama_cogito_32b": {
       "plugin": "LocalModel",
       "provider": "ollama",
-      "model": "qwen3:14b",
+      "model": "cogito:32b",
       "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
     },
-    "ollama_qwen3_30b": {
+    "ollama_cogito_70b": {
       "plugin": "LocalModel",
       "provider": "ollama",
-      "model": "qwen3:30b",
+      "model": "cogito:70b",
+      "temperature": 0.2,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
+    },
+    "ollama_llama3_3_70b": {
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "llama3.3:70b",
       "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
@@ -291,57 +154,15 @@
       "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
-    },
-    "ollama_phi4_14b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "phi4:14b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_smollm_135m": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "smollm:135m",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_smollm_360m": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "smollm:360m",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "foundation_sec": {
-      "plugin": "HuggingfaceModel",
-      "provider": "huggingface",
-      "model": "fdtn-ai/Foundation-Sec-8B",
-      "model_path": "fdtn-ai/Foundation-Sec-8B",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "device": "auto",
-      "load_config": {
-        "model": {
-          "trust_remote_code": false,
-          "low_cpu_mem_usage": true
-        },
-        "tokenizer": {
-          "trust_remote_code": false
-        }
-      }
     }
-  },
+ },
   "prompt_techniques": {
     "progressive_hint": {
       "plugin": "ProgressiveHintPlugin",
       "description": "Progressive Hint Prompting - Gera dicas progressivas para melhorar a classificação",
       "default_params": {
         "max_hints": 4,
-        "limite_rouge": 0.2
+        "limite_rouge": 0.9
       }
     },
     "self_hint": {
@@ -349,7 +170,7 @@
       "description": "Self Hint Prompting - O modelo gera seu próprio plano e se auto-refina",
       "default_params": {
         "max_iter": 4,
-        "limite_qualidade": 0.2
+        "limite_qualidade": 0.9
       }
     },
     "progressive_rectification": {
@@ -357,7 +178,7 @@
       "description": "Progressive Rectification Prompting - Valida e retifica respostas usando mascaramento",
       "default_params": {
         "max_iter": 4,
-        "limite_qualidade": 0.2
+        "limite_qualidade": 0.9
       }
     },
     "hypothesis_testing": {
@@ -365,7 +186,7 @@
       "description": "Hypothesis Testing Prompting - Testa hipóteses para cada categoria NIST sistematicamente",
       "default_params": {
         "max_iter": 12,
-        "limite_qualidade": 0.2
+        "limite_qualidade": 0.9
       }
     },
     "free_prompt": {

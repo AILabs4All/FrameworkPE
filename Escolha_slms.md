@@ -33,7 +33,9 @@ Para cada característica categórica, o peso de raridade é dado por:
 $$\text{Peso}(\text{valor}) = \frac{N}{\text{contagem}(\text{valor})}$$
 
 Onde:
+
 - $N$ = número total de modelos no dataset
+
 - $\text{contagem}(\text{valor})$ = quantas vezes aquele valor aparece
 
 **Interpretação**: Valores raros recebem pesos altos, valores comuns recebem pesos baixos.
@@ -63,13 +65,19 @@ Antes do cálculo de raridade, aplicamos um **filtro de versões mais recentes**
 Para cada combinação de **(Família, Tamanho)**, mantemos apenas a **versão mais recente**.
 
 ### Exemplos
+
 - **Phi-3 14B** vs **Phi-4 14B** → Mantém apenas **Phi-4 14B**
+
 - **Qwen2.5 8B** vs **Qwen3 8B** → Mantém apenas **Qwen3 8B**
+
 - **Llama 3.1 70B** vs **Llama 3.3 70B** → Mantém apenas **Llama 3.3 70B** 
 
 ### Justificativa
+
 - Evita testar múltiplas versões do mesmo modelo base
+
 - Prioriza arquiteturas mais modernas e otimizadas
+
 - Reduz redundância mantendo diversidade arquitetural
 
 
@@ -88,7 +96,7 @@ Combinações menos comuns, mas não únicas:
 
 ### Baixa Raridade (Score < 5)
 Arquitetura padrão predominante:
-- **GQA + SwiGLU + RMSNorm + 128K tokens** - configuração mais comum
+- **GQA + SwiGLU + RMSNorm + 128K tokens** configuração mais comum
 - Presente em Llama, Mistral, Qwen, etc.
 
 
@@ -122,7 +130,7 @@ Modelos de referência que sempre entram na seleção:
 - **Balanceada**: Combina múltiplas dimensões arquiteturais  
 - **Prática**: Garante diversidade sem perder modelos-referência  
 
----
+---git pull origin exp24
 
 ## Exemplo Prático
 
