@@ -154,6 +154,14 @@
       "temperature": 0.2,
       "max_tokens": 2000,
       "base_url": "http://localhost:11434"
+    },
+    "ollama_gemma3_27b":{
+      "plugin": "LocalModel",
+      "provider": "ollama",
+      "model": "gemma3:27b-it-qat",
+      "temperature": 0.2,
+      "max_tokens": 2000,
+      "base_url": "http://localhost:11434"
     }
  },
   "prompt_techniques": {
