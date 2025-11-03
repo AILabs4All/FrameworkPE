@@ -107,10 +107,26 @@
         "max_tokens": 2000,
         "base_url": "http://localhost:11434"
       },
-      "ollama_gemma3_9b": {
+      "ollama_gemma3_12b": {
         "plugin": "LocalModel",
         "provider": "ollama",
-        "model": "gemma3:9b",
+        "model": "gemma3:12b",
+        "temperature": 0.2,
+        "max_tokens": 2000,
+        "base_url": "http://localhost:11434"
+      },
+      "ollama_gemma2_9b": {
+        "plugin": "LocalModel",
+        "provider": "ollama",
+        "model": "gemma2:9b",
+        "temperature": 0.2,
+        "max_tokens": 2000,
+        "base_url": "http://localhost:11434"
+      },
+      "ollama_gemma2_27b": {
+        "plugin": "LocalModel",
+        "provider": "ollama",
+        "model": "gemma2:27b",
         "temperature": 0.2,
         "max_tokens": 2000,
         "base_url": "http://localhost:11434"
