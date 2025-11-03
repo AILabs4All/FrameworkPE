@@ -11,159 +11,207 @@
     "enable_file": true
   },
   "models": {
-    "ollama_mistral_7b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "mistral:7b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_falcon3_7b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "falcon3:7b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_falcon3_10b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "falcon3:10b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_gpt_oss_20b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "gpt-oss:20b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_phi4_14b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "phi4:14b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_deepseek_r1_7b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "deepseek-r1:7b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_deepseek_r1_8b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "deepseek-r1:8b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_deepseek_r1_14b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "deepseek-r1:14b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_gemma2_9b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "gemma2:9b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_granite3_2_8b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "granite3.2:8b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_foundation_sec_8b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "huihui_ai/foundation-sec-abliterated:8b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_llama3_1_8b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "llama3.1:8b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_deepseek_r1_32b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "deepseek-r1:32b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_deepseek_r1_70b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "deepseek-r1:70b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_cogito_32b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "cogito:32b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_cogito_70b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "cogito:70b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_llama3_3_70b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "llama3.3:70b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_qwen3_32b": {
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "qwen3:32b",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    },
-    "ollama_gemma3_27b":{
-      "plugin": "LocalModel",
-      "provider": "ollama",
-      "model": "gemma3:27b-it-qat",
-      "temperature": 0.2,
-      "max_tokens": 2000,
-      "base_url": "http://localhost:11434"
-    }
- },
+      "ollama_mistral_7b": {
+        "plugin": "LocalModel",
+        "provider": "ollama",
+        "model": "mistral:7b",
+        "temperature": 0.2,
+        "max_tokens": 2000,
+        "base_url": "http://localhost:11434"
+      },
+      "ollama_falcon3_7b": {
+        "plugin": "LocalModel",
+        "provider": "ollama",
+        "model": "falcon3:7b",
+        "temperature": 0.2,
+        "max_tokens": 2000,
+        "base_url": "http://localhost:11434"
+      },
+      "ollama_falcon3_10b": {
+        "plugin": "LocalModel",
+        "provider": "ollama",
+        "model": "falcon3:10b",
+        "temperature": 0.2,
+        "max_tokens": 2000,
+        "base_url": "http://localhost:11434"
+      },
+      "ollama_gpt_oss_20b": {
+        "plugin": "LocalModel",
+        "provider": "ollama",
+        "model": "gpt-oss:20b",
+        "temperature": 0.2,
+        "max_tokens": 2000,
+        "base_url": "http://localhost:11434"
+      },
+      "ollama_phi4_14b": {
+        "plugin": "LocalModel",
+        "provider": "ollama",
+        "model": "phi4:14b",
+        "temperature": 0.2,
+        "max_tokens": 2000,
+        "base_url": "http://localhost:11434"
+      },
+      "ollama_phi3_medium_14b": {
+        "plugin": "LocalModel",
+        "provider": "ollama",
+        "model": "phi3:medium-14b",
+        "temperature": 0.2,
+        "max_tokens": 2000,
+        "base_url": "http://localhost:11434"
+      },
+      "ollama_phi3_small_7b": {
+        "plugin": "LocalModel",
+        "provider": "ollama",
+        "model": "phi3:small-7b",
+        "temperature": 0.2,
+        "max_tokens": 2000,
+        "base_url": "http://localhost:11434"
+      },
+      "ollama_deepseek_r1_8b": {
+        "plugin": "LocalModel",
+        "provider": "ollama",
+        "model": "deepseek-r1:8b",
+        "temperature": 0.2,
+        "max_tokens": 2000,
+        "base_url": "http://localhost:11434"
+      },
+      "ollama_deepseek_r1_70b": {
+        "plugin": "LocalModel",
+        "provider": "ollama",
+        "model": "deepseek-r1:70b",
+        "temperature": 0.2,
+        "max_tokens": 2000,
+        "base_url": "http://localhost:11434"
+      },
+      "ollama_cogito_70b": {
+        "plugin": "LocalModel",
+        "provider": "ollama",
+        "model": "cogito:70b",
+        "temperature": 0.2,
+        "max_tokens": 2000,
+        "base_url": "http://localhost:11434"
+      },
+      "ollama_cogito_8b": {
+        "plugin": "LocalModel",
+        "provider": "ollama",
+        "model": "cogito:8b",
+        "temperature": 0.2,
+        "max_tokens": 2000,
+        "base_url": "http://localhost:11434"
+      },
+      "ollama_gemma3_27b": {
+        "plugin": "LocalModel",
+        "provider": "ollama",
+        "model": "gemma3:27b-it-qat",
+        "temperature": 0.2,
+        "max_tokens": 2000,
+        "base_url": "http://localhost:11434"
+      },
+      "ollama_gemma3_9b": {
+        "plugin": "LocalModel",
+        "provider": "ollama",
+        "model": "gemma3:9b",
+        "temperature": 0.2,
+        "max_tokens": 2000,
+        "base_url": "http://localhost:11434"
+      },
+      "ollama_granite3_2_8b": {
+        "plugin": "LocalModel",
+        "provider": "ollama",
+        "model": "granite3.2:8b",
+        "temperature": 0.2,
+        "max_tokens": 2000,
+        "base_url": "http://localhost:11434"
+      },
+      "ollama_foundation_sec_8b": {
+        "plugin": "LocalModel",
+        "provider": "ollama",
+        "model": "huihui_ai/foundation-sec-abliterated:8b",
+        "temperature": 0.2,
+        "max_tokens": 2000,
+        "base_url": "http://localhost:11434"
+      },
+      "ollama_llama3_1_8b": {
+        "plugin": "LocalModel",
+        "provider": "ollama",
+        "model": "llama3.1:8b",
+        "temperature": 0.2,
+        "max_tokens": 2000,
+        "base_url": "http://localhost:11434"
+      },
+      "ollama_llama3_1_70b": {
+        "plugin": "LocalModel",
+        "provider": "ollama",
+        "model": "llama3.1:70b",
+        "temperature": 0.2,
+        "max_tokens": 2000,
+        "base_url": "http://localhost:11434"
+      },
+      "ollama_llama3_3_70b": {
+        "plugin": "LocalModel",
+        "provider": "ollama",
+        "model": "llama3.3:70b",
+        "temperature": 0.2,
+        "max_tokens": 2000,
+        "base_url": "http://localhost:11434"
+      },
+      "ollama_mistral_small_24b": {
+        "plugin": "LocalModel",
+        "provider": "ollama",
+        "model": "mistral-small:24b",
+        "temperature": 0.2,
+        "max_tokens": 2000,
+        "base_url": "http://localhost:11434"
+      },
+      "ollama_qwen2_5_7b": {
+        "plugin": "LocalModel",
+        "provider": "ollama",
+        "model": "qwen2.5:7b",
+        "temperature": 0.2,
+        "max_tokens": 2000,
+        "base_url": "http://localhost:11434"
+      },
+      "ollama_qwen2_5_32b": {
+        "plugin": "LocalModel",
+        "provider": "ollama",
+        "model": "qwen2.5:32b",
+        "temperature": 0.2,
+        "max_tokens": 2000,
+        "base_url": "http://localhost:11434"
+      },
+      "ollama_qwen3_8b": {
+        "plugin": "LocalModel",
+        "provider": "ollama",
+        "model": "qwen3:8b",
+        "temperature": 0.2,
+        "max_tokens": 2000,
+        "base_url": "http://localhost:11434"
+      },
+      "ollama_qwen3_32b": {
+        "plugin": "LocalModel",
+        "provider": "ollama",
+        "model": "qwen3:32b",
+        "temperature": 0.2,
+        "max_tokens": 2000,
+        "base_url": "http://localhost:11434"
+      },
+      "ollama_smollm2_1_7b": {
+        "plugin": "LocalModel",
+        "provider": "ollama",
+        "model": "smollm2:1.7b",
+        "temperature": 0.2,
+        "max_tokens": 2000,
+        "base_url": "http://localhost:11434"
+      },
+      "ollama_tinyllama_1_1b": {
+        "plugin": "LocalModel",
+        "provider": "ollama",
+        "model": "tinyllama:1.1b",
+        "temperature": 0.2,
+        "max_tokens": 2000,
+        "base_url": "http://localhost:11434"
+      }
+  },
   "prompt_techniques": {
     "progressive_hint": {
       "plugin": "ProgressiveHintPlugin",
