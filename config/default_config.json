@@ -54,15 +54,15 @@
       "ollama_phi3_medium_14b": {
         "plugin": "LocalModel",
         "provider": "ollama",
-        "model": "phi3:medium-14b",
+        "model": "phi3:14b",
         "temperature": 0.2,
         "max_tokens": 2000,
         "base_url": "http://localhost:11434"
       },
-      "ollama_phi3_small_7b": {
+      "ollama_phi3_small_8b": {
         "plugin": "LocalModel",
         "provider": "ollama",
-        "model": "phi3:small-7b",
+        "model": "phi3:3.8b",
         "temperature": 0.2,
         "max_tokens": 2000,
         "base_url": "http://localhost:11434"
