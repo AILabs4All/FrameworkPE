@@ -1,19 +1,19 @@
 # Framework de Classificação de Incidentes de Segurança
 
-## 🔒 Visão Geral
+## Visão Geral
 
 O **Framework de Classificação de Incidentes de Segurança** é uma solução plugável e extensível para classificação automatizada de incidentes de segurança cibernética usando técnicas avançadas de prompt engineering e diferentes modelos de linguagem (LLMs/SLMs).
 
-### ✨ Características Principais
+### Características Principais
 
-- **🔌 Arquitetura Plugável**: Sistema modular que permite adicionar novos modelos e técnicas facilmente
-- **🤖 Múltiplos Provedores**: Suporte para OpenAI, Hugging Face, Ollama e outros via LiteLLM
-- **🎯 Técnicas de Prompt Avançadas**: Implementação de Progressive Hint, Self Hint, Progressive Rectification e Hypothesis Testing
-- **📊 Classificação NIST**: Categorização automática seguindo padrões NIST (CAT1-CAT12)
-- **📈 Métricas Detalhadas**: Tracking de tokens, custos e performance
-- **🔧 Configuração Flexível**: Sistema de configuração JSON/YAML com variáveis de ambiente
+- **Arquitetura Plugável**: Sistema modular que permite adicionar novos modelos e técnicas facilmente
+- **Múltiplos Provedores**: Suporte para OpenAI, Hugging Face, Ollama e outros via LiteLLM
+- **Técnicas de Prompt Avançadas**: Implementação de Progressive Hint, Self Hint, Progressive Rectification e Hypothesis Testing
+- **Classificação NIST**: Categorização automática seguindo padrões NIST (CAT1-CAT12)
+- **Métricas Detalhadas**: Tracking de tokens, custos e performance
+- **Configuração Flexível**: Sistema de configuração JSON/YAML com variáveis de ambiente
 
-## 🚀 Instalação Rápida
+## Instalação Rápida
 
 ### Pré-requisitos
 
@@ -49,7 +49,7 @@ cp .env.example .env
 # Edite .env com suas chaves de API
 ```
 
-## 📖 Uso
+## Uso
 
 ### Comando Básico
 
@@ -118,7 +118,7 @@ python main.py --list-techniques
 python main.py --info
 ```
 
-## 🔧 Configuração
+## Configuração
 
 ### Estrutura de Configuração
 
@@ -173,7 +173,7 @@ AZURE_OPENAI_API_KEY=your-azure-key
 AZURE_OPENAI_ENDPOINT=https://your-endpoint.openai.azure.com/
 ```
 
-## 🏗️ Arquitetura
+## Arquitetura
 
 ### Estrutura do Projeto
 
@@ -217,7 +217,7 @@ security-incident-framework/
 5. **Resultados**: Salva em formato especificado
 6. **Métricas**: Gera relatório de performance
 
-## 🎯 Técnicas de Prompt
+## Técnicas de Prompt
 
 ### 1. Progressive Hint Prompting (PHP)
 Melhora iterativamente as respostas através de dicas contextuais.
@@ -245,7 +245,7 @@ Testa múltiplas hipóteses de classificação antes da decisão final.
 **Parâmetros:**
 - `num_hypotheses`: Número de hipóteses (padrão: 3)
 
-## 📊 Categorias NIST
+## Categorias NIST
 
 O framework classifica incidentes nas seguintes categorias:
 
@@ -264,7 +264,7 @@ O framework classifica incidentes nas seguintes categorias:
 | CAT11 | Third-Party Issues | Problemas de terceiros |
 | CAT12 | Intrusion Attempt | Tentativas de intrusão |
 
-## 🔌 Desenvolvendo Plugins
+## Desenvolvendo Plugins
 
 ### Plugin de Modelo
 
@@ -293,7 +293,7 @@ class CustomPromptPlugin(BasePromptPlugin):
         pass
 ```
 
-## 📈 Métricas e Monitoramento
+## Métricas e Monitoramento
 
 O framework coleta automaticamente:
 
@@ -314,7 +314,7 @@ print(f"Total de tokens: {summary['total_tokens']}")
 print(f"Custo total: ${summary['total_cost']:.4f}")
 ```
 
-## 🛠️ Formatos Suportados
+## Formatos Suportados
 
 ### Entrada
 - **CSV**: Arquivos com delimitadores padrão
@@ -326,7 +326,7 @@ print(f"Custo total: ${summary['total_cost']:.4f}")
 - **JSON**: Estruturado para APIs
 - **XLSX**: Para relatórios executivos
 
-## 🧪 Testes
+## Testes
 
 ```bash
 # Executar todos os testes
@@ -339,7 +339,7 @@ python -m pytest tests/test_plugins.py -v
 python -m pytest --cov=core --cov=plugins tests/
 ```
 
-## 🤝 Contribuindo
+## Contribuindo
 
 1. Fork o projeto
 2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
@@ -354,11 +354,11 @@ python -m pytest --cov=core --cov=plugins tests/
 - Atualize documentação quando necessário
 - Use type hints em todas as funções públicas
 
-## 📝 Licença
+## Licença
 
 Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
 
-## 🆘 Suporte
+## Suporte
 
 ### FAQ
 
@@ -377,14 +377,8 @@ R: Modifique o arquivo `utils/security_extractor.py` e atualize a configuração
 - **Documentação**: Wiki do projeto
 - **Email**: [seu-email@exemplo.com]
 
-## 🙏 Agradecimentos
+## Agradecimentos
 
 - [LiteLLM](https://docs.litellm.ai/) pela interface unificada de LLMs
 - [Ollama](https://ollama.ai/) por facilitar uso de SLMs locais
 - Comunidade NIST pelos padrões de classificação de incidentes
-
----
-
-**Versão**: 2.0.0  
-**Última atualização**: Setembro 2025  
-**Status**: 🟢 Ativo
