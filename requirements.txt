@@ -14,10 +14,6 @@ tokenizers>=0.15.0
 safetensors>=0.4.1
 fastuuid==0.13.3
 filelock==3.19.1
-fastuuid
-dotenv
+python-dotenv
 aiohttp
 litellm
-
-
-

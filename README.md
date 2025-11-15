@@ -21,6 +21,8 @@ O **Framework de Classificação de Incidentes de Segurança** é uma solução 
 - pip
 - Git
 
+
+
 ### Setup Automatizado
 
 ```bash
