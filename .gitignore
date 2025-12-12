@@ -16,6 +16,7 @@ build/
 *.pytest_cache/
 .coverage
 htmlcov/
+venv/
 .tox/
 .pytest_cache/
 .ipynb_checkpoints/
