@@ -18,6 +18,8 @@ class APIModel(BaseModel):
         "azure_openai": "AZURE_OPENAI_API_KEY",
         "huggingface": "HUGGINGFACE_API_KEY",
         "cohere": "COHERE_API_KEY",
+        "gemini": "GEMINI_API_KEY",
+        "google": "GEMINI_API_KEY",
     }
 
     PROVIDER_BASE_ENV_MAP = {
@@ -27,6 +29,8 @@ class APIModel(BaseModel):
 
     PROVIDER_PREFIX = {
         "huggingface": "huggingface/",
+        "gemini": "gemini/",
+        "google": "gemini/",
     }
 
     def setup_model(self) -> None:
