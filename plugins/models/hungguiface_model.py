@@ -4,9 +4,6 @@ from __future__ import annotations
 
 from typing import Any, Dict, Optional
 
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
-
 from .base_model import BaseModel
 
 
@@ -14,14 +11,20 @@ class HuggingfaceModel(BaseModel):
     """Modelo para execução usando HuggingFace Transformers."""
 
     def __init__(self, config: Dict[str, Any]):
-        self.tokenizer: Optional[AutoTokenizer] = None
-        self.model: Optional[AutoModelForCausalLM] = None
-        self.device: str = "cuda" if torch.cuda.is_available() else "cpu"
+        self.tokenizer: Optional[Any] = None
+        self.model: Optional[Any] = None
+        self.device: str = "cpu"
         super().__init__(config)
 
     def setup_model(self) -> None:
         """Configura o modelo e tokenizer do HuggingFace."""
         try:
+            # Import apenas quando necessário
+            import torch
+            from transformers import AutoTokenizer, AutoModelForCausalLM
+            
+            self.device = "cuda" if torch.cuda.is_available() else "cpu"
+            
             model_path = self.config.get("model_path", self.model_name)
             if not model_path:
                 raise ValueError("Nome do modelo ou caminho não especificado")
@@ -59,7 +62,9 @@ class HuggingfaceModel(BaseModel):
         """Envia prompt para o modelo e retorna a resposta."""
         if self.tokenizer is None or self.model is None:
             raise RuntimeError("Modelo não foi configurado corretamente")
-            
+        
+        import torch
+        
         mode = kwargs.get("mode", "default")
         
         try:
@@ -94,6 +99,8 @@ class HuggingfaceModel(BaseModel):
 
     def _get_device(self) -> str:
         """Determina o dispositivo a ser usado."""
+        import torch
+        
         device_config = self.config.get("device", "auto")
         
         if device_config == "auto":
@@ -120,10 +127,16 @@ class HuggingfaceModel(BaseModel):
 
     def get_model_info(self) -> Dict[str, Any]:
         """Retorna informações do modelo incluindo configurações específicas."""
+        try:
+            import torch
+            torch_available = torch.cuda.is_available()
+        except ImportError:
+            torch_available = False
+        
         base_info = super().get_model_info()
         base_info.update({
             "device": self.device,
-            "torch_available": torch.cuda.is_available() if hasattr(torch, 'cuda') else False,
+            "torch_available": torch_available,
             "model_loaded": self.model is not None,
             "tokenizer_loaded": self.tokenizer is not None,
         })

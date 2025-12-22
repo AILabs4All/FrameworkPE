@@ -6,18 +6,26 @@ from pathlib import Path
 from .config_loader import ConfigLoader
 from .plugin_manager import PluginManager
 from utils.logger import setup_logger
-from utils.logger import setup_logger
 from utils.file_handlers import load_data_files, save_results, validate_columns
 from utils.metrics import MetricsCollector
 
 class SecurityIncidentFramework:
     """Framework principal para classificação de incidentes de segurança."""
     
-    def __init__(self, config_path: str = "config.json"):
-        self.logger = setup_logger("SecurityIncidentFramework")
+    def __init__(self, config_path: str = "config.json", project=None):
+        """Inicializa framework opcionalmente com projeto isolado."""
+        self.project = project
+        
+        # Define diretório de logs baseado no projeto
+        log_dir = str(project.logs_dir) if project else "logs"
+        self.logger = setup_logger("SecurityIncidentFramework", log_dir=log_dir)
+        
         self.config = ConfigLoader.load(config_path)
         self.plugin_manager = PluginManager()
-        self.metrics_collector = MetricsCollector()
+        
+        # Inicializa MetricsCollector com diretório do projeto
+        metrics_dir = str(project.metrics_dir) if project else "logs"
+        self.metrics_collector = MetricsCollector(log_dir=metrics_dir)
         
         # Valida configuração
         config_loader = ConfigLoader()
@@ -69,33 +77,70 @@ class SecurityIncidentFramework:
         if not model_instance:
             raise ValueError(f"Erro ao criar instância do modelo: {model_name}")
         
-        # Configura técnica de prompt
-        prompt_config = self._get_prompt_config(prompt_technique)
-        if not prompt_config:
-            raise ValueError(f"Configuração de prompt não encontrada: {prompt_technique}")
-            
-        prompt_instance = self.plugin_manager.create_prompt_instance(
-            prompt_config["plugin"], model_instance
-        )
-        if not prompt_instance:
-            raise ValueError(f"Erro ao criar instância do prompt: {prompt_technique}")
+        # Suporta múltiplas técnicas de prompt
+        if isinstance(prompt_technique, list):
+            techniques = prompt_technique
+        else:
+            techniques = [prompt_technique]
         
-        # Processa incidentes
-        results = self._process_all_incidents(
-            dataframes, columns, prompt_instance, prompt_config, **kwargs
-        )
+        # Processa com cada técnica
+        all_results = []
+        for technique in techniques:
+            self.logger.info(f"Processando com técnica: {technique}")
+            
+            # Configura técnica de prompt
+            prompt_config = self._get_prompt_config(technique)
+            if not prompt_config:
+                self.logger.warning(f"Configuração de prompt não encontrada: {technique}")
+                continue
+                
+            prompt_instance = self.plugin_manager.create_prompt_instance(
+                prompt_config["plugin"], model_instance
+            )
+            if not prompt_instance:
+                self.logger.warning(f"Erro ao criar instância do prompt: {technique}")
+                continue
+            
+            # Processa incidentes
+            results = self._process_all_incidents(
+                dataframes, columns, prompt_instance, prompt_config, **kwargs
+            )
+            
+            # Adiciona informação da técnica aos resultados
+            for result in results:
+                result['technique_used'] = technique
+            
+            all_results.extend(results)
+        
+        if not all_results:
+            raise ValueError(f"Nenhum resultado foi gerado com as técnicas: {prompt_technique}")
+        
+        # Define caminho de saída baseado no projeto
+        technique_str = "_".join(techniques) if isinstance(prompt_technique, list) else prompt_technique
+        if self.project:
+            output_path = str(self.project.get_results_path(f"resultados_{model_name}_{technique_str}"))
+        else:
+            output_path = f"resultados_{model_name}_{technique_str}"
         
         # Salva resultados
-        output_path = f"resultados_{model_name}_{prompt_technique}"
-        save_results(results, output_path, output_format)
+        save_results(all_results, output_path.replace(f'.{output_format}', ''), output_format)
         
         # Coleta métricas finais
         performance_summary = self.metrics_collector.log_performance_summary()
         
+        # Salva métricas no projeto se disponível
+        if self.project:
+            metrics_file = self.project.get_metrics_path(f"performance_{model_name}_{technique_str}.json")
+            import json
+            with open(metrics_file, 'w', encoding='utf-8') as f:
+                json.dump(performance_summary, f, indent=2)
+        
         summary = {
-            "total_incidents": len(results),
+            "total_incidents": len(all_results),
+            "results": all_results,
             "model_used": model_name,
             "prompt_technique": prompt_technique,
+            "techniques_used": techniques,
             "output_file": f"{output_path}.{output_format}",
             "performance": performance_summary
         }

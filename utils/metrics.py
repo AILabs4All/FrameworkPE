@@ -12,7 +12,7 @@ class TokenMetrics:
     def __init__(self, log_dir: str = "logs"):
         self.log_dir = Path(log_dir)
         self.log_dir.mkdir(parents=True, exist_ok=True)
-        self.logger = setup_logger("TokenMetrics")
+        self.logger = setup_logger("TokenMetrics", log_dir=log_dir)
         self.interactions = []
         
     def log_interaction(self, model_name: str, mode: str, input_tokens: int, 
@@ -87,11 +87,13 @@ class TokenMetrics:
 class MetricsCollector:
     """Coletor de métricas de performance do sistema."""
     
-    def __init__(self):
+    def __init__(self, log_dir: str = "logs"):
         self.start_time = time.time()
         self.process = psutil.Process()
         self.initial_memory = self.process.memory_info().rss / (1024 * 1024)  # MB
-        self.logger = setup_logger("MetricsCollector")
+        self.log_dir = Path(log_dir)
+        self.log_dir.mkdir(parents=True, exist_ok=True)
+        self.logger = setup_logger("MetricsCollector", log_dir=log_dir)
     
     def get_memory_usage(self) -> float:
         """Retorna uso atual de memória em MB."""
