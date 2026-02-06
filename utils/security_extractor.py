@@ -14,10 +14,8 @@ def extract_security_incidents(texto: str) -> Dict[str, str]:
     Returns:
         dict: Um dicionário contendo os valores de 'Category' e 'Explanation'.
     """
-    # Verifica se o texto é um JSON válido
     if is_valid_json(texto):
         dados = json.loads(texto)
-        # Verifica se o JSON contém as chaves 'Category' e 'Explanation'
         if "Category" in dados and "Explanation" in dados:
             return {
                 "Category": dados["Category"].strip(),
@@ -28,7 +26,6 @@ def extract_security_incidents(texto: str) -> Dict[str, str]:
     padrao = r"(?:\*\*Category:\*\*|Category:)\s*(.*?)\s*(?:\*\*Explanation:\*\*|Explanation:|Explanation:)\s*(.*?)(?=\n|$)"
     matches = re.findall(padrao, texto, re.DOTALL)
 
-    # Retorna apenas a última ocorrência válida, se existir
     if matches:
         ultima_ocorrencia = matches[-1]
         return {

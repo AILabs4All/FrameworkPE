@@ -43,7 +43,6 @@ def load_data_files(data_dir: str) -> List[pd.DataFrame]:
                     continue
                 
                 if not df.empty:
-                    # Validar colunas obrigatórias
                     required_columns = ['id', 'target']
                     missing_columns = [col for col in required_columns if col not in df.columns]
                     
