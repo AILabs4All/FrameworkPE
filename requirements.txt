@@ -16,4 +16,4 @@ fastuuid==0.13.3
 filelock==3.19.1
 python-dotenv
 aiohttp
-litellm
+litellm<=1.82.6

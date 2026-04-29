@@ -5,7 +5,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-def setup_logger(name: str, log_level: str = "INFO", log_dir: str = "logs") -> logging.Logger:
+def setup_logger(name: str,
+                 log_level: str = "INFO",
+                 log_dir: str = "logs"
+    ) -> logging.Logger:
     """
     Configura e retorna um logger personalizado.
     

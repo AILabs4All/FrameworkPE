@@ -41,14 +41,13 @@ class PangolinProject:
         self.data_dir = self.project_path / "data"
         self.prompts_dir = self.project_path / "prompts"
         self.logs_dir = self.project_path / "logs"
-        self.metrics_dir = self.project_path / "logs"  # Métricas salvas em logs/
+        self.metrics_dir = self.project_path / "logs"
         self.model_dir = self.project_path / "model"
         self.output_dir = self.project_path / "output"
         self.config_file = self.project_path / "config.yaml"
-        
-        # Logger
+
         self.logger = setup_logger(f"Pangolin-{self.project_name}")
-        
+
     def create(self, config: Optional[Dict[str, Any]] = None):
         """
         Cria a estrutura do projeto.
@@ -101,21 +100,19 @@ class PangolinProject:
                 "input_columns": ["description"],
                 "required_columns": ["id", "target"]
             },
-            "model": {
-                "name": "ollama_gemma2:9b",
-                "provider": "ollama",
-                "temperature": 0.2,
-                "max_tokens": 2048
-            },
+            "models": [
+                {
+                    "name": "ollama_gemma2:9b",
+                    "provider": "ollama",
+                    "temperature": 0.2,
+                    "max_tokens": 2048
+                }
+            ],
             "prompt": {
-                "technique": "progressive_hint",
+                "technique": ["progressive_hint"],
                 "custom_prompts_dir": "prompts",
                 "available_techniques": [
-                    "progressive_hint",
-                    "progressive_rectification",
                     "self_hint",
-                    "hypothesis_testing",
-                    "free_prompt",
                     "zeroshot"
                 ]
             },
@@ -129,7 +126,12 @@ class PangolinProject:
     def _save_config(self, config: Dict[str, Any]):
         """Salva configuração em config.yaml."""
         with open(self.config_file, 'w', encoding='utf-8') as f:
-            yaml.dump(config, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+            yaml.dump(config, 
+                      f, 
+                      default_flow_style=False, 
+                      allow_unicode=True, 
+                      sort_keys=False
+            )
     
     def _create_readme(self):
         """Cria README no diretório do projeto."""
@@ -255,7 +257,7 @@ Criado em: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
         errors = []
         
         # Valida seções obrigatórias
-        required_sections = ["project", "data", "model", "prompt", "output"]
+        required_sections = ["project", "data", "models", "prompt", "output"]
         for section in required_sections:
             if section not in config:
                 errors.append(f"Seção obrigatória ausente: {section}")
@@ -271,11 +273,17 @@ Criado em: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                 errors.append("Campo 'data.input_columns' é obrigatório")
             elif not isinstance(config["data"]["input_columns"], list):
                 errors.append("Campo 'data.input_columns' deve ser uma lista")
-        
-        # Valida modelo
-        if "model" in config:
-            if "name" not in config["model"]:
-                errors.append("Campo 'model.name' é obrigatório")
+        # Valida modelos
+        if "models" not in config:
+            errors.append("Campo 'models' é obrigatório")
+        elif not isinstance(config["models"], list) or len(config["models"]) == 0:
+            errors.append("Campo 'models' deve ser uma lista com pelo menos um modelo")
+        else:
+            for i, mb in enumerate(config["models"]):
+                if "name" not in mb:
+                    errors.append(f"Campo 'name' é obrigatório no modelo[{i}]")
+                if "provider" not in mb:
+                    errors.append(f"Campo 'provider' é obrigatório no modelo[{i}]")
         
         # Valida prompt
         if "prompt" in config:
@@ -343,60 +351,52 @@ Criado em: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
         Returns:
             Lista de arquivos importados
         """
-        imported = []
-        model_name = config.get('model', {}).get('name', '')
+        imported = set()
+        models = config.get('models', [])
         
-        if not model_name:
-            return imported
+        if not models:
+            return list(imported)
         
-        # Determina o tipo de provider (exatamente como declarado no config)
-        provider = config.get('model', {}).get('provider', 'ollama').lower()
-        
-        # Mapeia provider para plugin
-        # ollama -> local_model.py (modelos locais)
-        # huggingface/hungifface -> hungguiface_model.py
-        # openai, anthropic, gemini, cohere, etc -> api_model.py (usa litellm)
-        provider_map = {
-            'ollama': 'local_model.py',
-            'local': 'local_model.py',
-            'huggingface': 'hungguiface_model.py',
-            'hungifface': 'hungguiface_model.py',
-            'openai': 'api_model.py',
-            'anthropic': 'api_model.py',
-            'gemini': 'api_model.py',
-            'google': 'api_model.py',
-            'cohere': 'api_model.py',
-            'azure': 'api_model.py',
-            'bedrock': 'api_model.py',
-            'vertex': 'api_model.py',
-            'palm': 'api_model.py'
-        }
-        
-        plugin_file = provider_map.get(provider, 'api_model.py')
-        
-        # Caminho fonte (plugins do framework)
-        framework_plugins = self.project_path.parent / "plugins" / "models"
-        source_file = framework_plugins / plugin_file
-        
-        if source_file.exists():
-            # Copia para o diretório model/ do projeto
-            dest_file = self.model_dir / plugin_file
-            if not dest_file.exists():
-                shutil.copy2(source_file, dest_file)
-                imported.append(plugin_file)
-                self.logger.info(f"Plugin de modelo importado: {plugin_file} (provider: {provider})")
+        for model in models:
+            provider = model.get('provider', 'ollama').lower()
             
-            # Também copia base_model.py se necessário
-            base_source = framework_plugins / "base_model.py"
-            base_dest = self.model_dir / "base_model.py"
-            if base_source.exists() and not base_dest.exists():
-                shutil.copy2(base_source, base_dest)
-                imported.append("base_model.py")
-                self.logger.info(f"Base model importado: base_model.py")
-        else:
-            self.logger.warning(f"Arquivo de plugin não encontrado: {source_file}")
-        
-        return imported
+            provider_map = {
+                'ollama': 'local_model.py',
+                'local': 'local_model.py',
+                'huggingface': 'hungguiface_model.py',
+                'hungifface': 'hungguiface_model.py',
+                'openai': 'api_model.py',
+                'anthropic': 'api_model.py',
+                'gemini': 'api_model.py',
+                'google': 'api_model.py',
+                'cohere': 'api_model.py',
+                'azure': 'api_model.py',
+                'bedrock': 'api_model.py',
+                'vertex': 'api_model.py',
+                'palm': 'api_model.py'
+            }
+            
+            plugin_file = provider_map.get(provider, 'api_model.py')
+            framework_plugins = Path(__file__).resolve().parent.parent / "plugins" / "models"
+            source_file = framework_plugins / plugin_file
+            
+            if source_file.exists():
+                dest_file = self.model_dir / plugin_file
+                if not dest_file.exists():
+                    shutil.copy2(source_file, dest_file)
+                    imported.add(plugin_file)
+                    self.logger.info(f"Plugin de modelo importado: {plugin_file} (provider: {provider})")
+                
+                base_source = framework_plugins / "base_model.py"
+                base_dest = self.model_dir / "base_model.py"
+                if base_source.exists() and not base_dest.exists():
+                    shutil.copy2(base_source, base_dest)
+                    imported.add("base_model.py")
+                    self.logger.info(f"Base model importado: base_model.py")
+            else:
+                self.logger.warning(f"Arquivo de plugin não encontrado: {source_file}")
+            
+        return list(imported)
     
     def _import_prompt_plugins(self, config: Dict[str, Any]) -> list[str]:
         """
@@ -431,7 +431,7 @@ Criado em: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
         }
         
         # Caminho fonte (plugins do framework)
-        framework_plugins = self.project_path.parent / "plugins" / "prompts"
+        framework_plugins = Path(__file__).resolve().parent.parent / "plugins" / "prompts"
         
         for tech in techniques:
             plugin_file = technique_map.get(tech)
@@ -465,7 +465,7 @@ Criado em: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                 raise ValueError(f"Projeto '{self.project_name}' não existe")
             
             shutil.rmtree(self.project_path)
-            self.logger.info(f"🗑️  Projeto '{self.project_name}' removido")
+            self.logger.info(f"Projeto '{self.project_name}' removido")
             
         except Exception as e:
             self.logger.error(f"Erro ao remover projeto: {e}")

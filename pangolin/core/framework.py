@@ -3,7 +3,6 @@ import pandas as pd
 import tqdm
 from pathlib import Path
 
-from .config_loader import ConfigLoader
 from .plugin_manager import PluginManager
 from utils.logger import setup_logger
 from utils.file_handlers import load_data_files, save_results, validate_columns
@@ -12,7 +11,7 @@ from utils.metrics import MetricsCollector
 class SecurityIncidentFramework:
     """Framework principal para classificação de incidentes de segurança."""
     
-    def __init__(self, config_path: str = "config.json", project=None):
+    def __init__(self, project=None):
         """Inicializa framework opcionalmente com projeto isolado."""
         self.project = project
         
@@ -20,37 +19,32 @@ class SecurityIncidentFramework:
         log_dir = str(project.logs_dir) if project else "logs"
         self.logger = setup_logger("SecurityIncidentFramework", log_dir=log_dir)
         
-        self.config = ConfigLoader.load(config_path)
         self.plugin_manager = PluginManager()
         
         # Inicializa MetricsCollector com diretório do projeto
         metrics_dir = str(project.metrics_dir) if project else "logs"
         self.metrics_collector = MetricsCollector(log_dir=metrics_dir)
         
-        # Valida configuração
-        config_loader = ConfigLoader()
-        if not config_loader.validate_config(self.config):
-            raise ValueError("Configuração inválida")
-        
         self.logger.info("Framework de Classificação de Incidentes de Segurança iniciado")
         
-    def process_incidents(self, input_dir: str, columns: List[str], model_name: str, 
-                         prompt_technique: str, output_format: str = "csv", **kwargs) -> Dict[str, Any]:
+    def process_incidents(self, input_dir: str, columns: List[str], model_config: Dict[str, Any], 
+                         prompt_techniques: List[str], output_format: str = "csv", **kwargs) -> Dict[str, Any]:
         """
         Processa incidentes de segurança usando modelo e técnica especificados.
         
         Args:
             input_dir: Diretório com arquivos de incidentes
             columns: Colunas para usar como prompt
-            model_name: Nome do modelo configurado
-            prompt_technique: Técnica de prompt a usar
+            model_config: Configuração do modelo
+            prompt_techniques: Lista de técnicas de prompt a usar
             output_format: Formato de saída (csv, json, xlsx)
             **kwargs: Parâmetros adicionais para a técnica
             
         Returns:
             Dict com resultados e métricas
         """
-        self.logger.info(f"Iniciando processamento - Modelo: {model_name}, Técnica: {prompt_technique}")
+        model_name = model_config.get('name', 'unknown')
+        self.logger.info(f"Iniciando processamento - Modelo: {model_name}, Técnicas: {prompt_techniques}")
         
         # Carrega dados
         try:
@@ -67,21 +61,32 @@ class SecurityIncidentFramework:
             raise
         
         # Configura modelo
-        model_config = self._get_model_config(model_name)
-        if not model_config:
-            raise ValueError(f"Configuração de modelo não encontrada: {model_name}")
-            
+        provider_map = {
+            'ollama': 'LocalModel',
+            'local': 'LocalModel',
+            'huggingface': 'HuggingfaceModel',
+            'hungifface': 'HuggingfaceModel',
+            'openai': 'APIModel',
+            'anthropic': 'APIModel',
+            'gemini': 'APIModel',
+            'google': 'APIModel',
+            'cohere': 'APIModel',
+            'azure': 'APIModel',
+            'bedrock': 'APIModel',
+            'vertex': 'APIModel',
+            'palm': 'APIModel'
+        }
+        
+        provider = model_config.get('provider', '').lower()
+        plugin_name = provider_map.get(provider, 'APIModel')
+        
         model_instance = self.plugin_manager.create_model_instance(
-            model_config["plugin"], model_config
+            plugin_name, model_config
         )
         if not model_instance:
             raise ValueError(f"Erro ao criar instância do modelo: {model_name}")
         
-        # Suporta múltiplas técnicas de prompt
-        if isinstance(prompt_technique, list):
-            techniques = prompt_technique
-        else:
-            techniques = [prompt_technique]
+        techniques = prompt_techniques
         
         # Processa com cada técnica
         all_results = []
@@ -89,21 +94,32 @@ class SecurityIncidentFramework:
             self.logger.info(f"Processando com técnica: {technique}")
             
             # Configura técnica de prompt
-            prompt_config = self._get_prompt_config(technique)
-            if not prompt_config:
-                self.logger.warning(f"Configuração de prompt não encontrada: {technique}")
+            prompt_map = {
+                'progressive_hint': 'ProgressiveHintPlugin',
+                'self_hint': 'SelfHintPlugin',
+                'progressive_rectification': 'ProgressiveRectificationPlugin',
+                'hypothesis_testing': 'HypothesisTestingPlugin',
+                'free_prompt': 'FreePromptPlugin',
+                'zeroshot': 'ZeroShotPlugin',
+                'zeroshot_b': 'ZeroShotPlugin'
+            }
+            
+            prompt_plugin_name = prompt_map.get(technique)
+            if not prompt_plugin_name:
+                self.logger.warning(f"Plugin não encontrado para a técnica: {technique}")
                 continue
                 
             prompt_instance = self.plugin_manager.create_prompt_instance(
-                prompt_config["plugin"], model_instance
+                prompt_plugin_name, model_instance
             )
             if not prompt_instance:
-                self.logger.warning(f"Erro ao criar instância do prompt: {technique}")
+                self.logger.warning(f"Erro ao criar instância do prompt para a técnica: {technique}")
                 continue
             
             # Processa incidentes
+            prompt_config_dict = {"plugin": prompt_plugin_name, "default_params": {}}
             results = self._process_all_incidents(
-                dataframes, columns, prompt_instance, prompt_config, **kwargs
+                dataframes, columns, prompt_instance, prompt_config_dict, **kwargs
             )
             
             # Adiciona informação da técnica aos resultados
@@ -113,10 +129,10 @@ class SecurityIncidentFramework:
             all_results.extend(results)
         
         if not all_results:
-            raise ValueError(f"Nenhum resultado foi gerado com as técnicas: {prompt_technique}")
+            raise ValueError(f"Nenhum resultado foi gerado com as técnicas: {prompt_techniques}")
         
         # Define caminho de saída baseado no projeto
-        technique_str = "_".join(techniques) if isinstance(prompt_technique, list) else prompt_technique
+        technique_str = "_".join(techniques) if isinstance(prompt_techniques, list) else prompt_techniques
         if self.project:
             output_path = str(self.project.get_results_path(f"resultados_{model_name}_{technique_str}"))
         else:
@@ -139,13 +155,13 @@ class SecurityIncidentFramework:
             "total_incidents": len(all_results),
             "results": all_results,
             "model_used": model_name,
-            "prompt_technique": prompt_technique,
+            "prompt_techniques": prompt_techniques,
             "techniques_used": techniques,
             "output_file": f"{output_path}.{output_format}",
             "performance": performance_summary
         }
         
-        self.logger.info(f"Processamento concluído: {len(results)} incidentes processados")
+        self.logger.info(f"Processamento concluído: {len(all_results)} incidentes processados")
         return summary
     
     def _process_all_incidents(self, dataframes: List[pd.DataFrame], columns: List[str], 
@@ -198,7 +214,7 @@ class SecurityIncidentFramework:
     
     def _build_prompt(self, row: pd.Series, columns: List[str]) -> str:
         """Constrói prompt base para classificação."""
-        nist_enabled = self.config.get("nist_categories", {}).get("enabled", True)
+        nist_enabled = True
         
         # Prompt base
         prompt = """
@@ -264,28 +280,11 @@ class SecurityIncidentFramework:
             for coluna in columns
         ])
     
-    def _get_model_config(self, model_name: str) -> Optional[Dict[str, Any]]:
-        """Obtém configuração do modelo."""
-        return self.config.get("models", {}).get(model_name)
-    
-    def _get_prompt_config(self, prompt_name: str) -> Optional[Dict[str, Any]]:
-        """Obtém configuração da técnica de prompt."""
-        return self.config.get("prompt_techniques", {}).get(prompt_name)
-    
-    def list_available_models(self) -> List[str]:
-        """Lista modelos disponíveis."""
-        return list(self.config.get("models", {}).keys())
-    
-    def list_available_prompts(self) -> List[str]:
-        """Lista técnicas de prompt disponíveis."""
-        return list(self.config.get("prompt_techniques", {}).keys())
-    
+
     def get_framework_info(self) -> Dict[str, Any]:
         """Retorna informações sobre o framework."""
         return {
-            "framework": self.config.get("framework", {}),
-            "available_models": self.list_available_models(),
-            "available_prompts": self.list_available_prompts(),
+            "framework": {"name": "Security Incident Framework", "version": "2.0.0"},
             "plugin_info": self.plugin_manager.get_plugin_info(),
-            "nist_categories_enabled": self.config.get("nist_categories", {}).get("enabled", True)
+            "nist_categories_enabled": True
         }
