@@ -1,5 +1,5 @@
 from .base_prompt import BasePromptPlugin
-from .config import htp_config.HtpConfig as HtpConfig
+from .config.prompt_config import HtpConfig
 from typing import Dict, Any, List, Optional
 import pandas as pd
 
