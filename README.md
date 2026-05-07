@@ -121,15 +121,19 @@ pg destroy --name meu_experimento
 O Pangolin suporta nativamente uma vasta gama de provedores (providers) e técnicas de prompt avançadas.
 
 ### 🌐 Providers (Provedores)
-O framework é capaz de se comunicar com diversos provedores ao redor do globo, repassando suas chamadas via APIs ou instâncias locais. Note que as chaves de rotas das APIs de terceiros devem estar populadas no seu arquivo `.env` na raiz do projeto (ex: `OPENAI_API_KEY=sk-...`), que é lido automaticamente.
+O framework é capaz de se comunicar com diversos provedores ao redor do globo, repassando suas chamadas via APIs ou instâncias locais. 
 
-Os seguintes providers são plenamente mapeados:
-- **`openai`**: Requer `OPENAI_API_KEY`.
-- **`anthropic`**: Requer `ANTHROPIC_API_KEY`.
-- **`gemini`** (ou `google`): Requer `GEMINI_API_KEY`.
-- **`ollama`** (ou `local`): Modelos hospedados localmente via Ollama (ex: rodando na porta padrão 11434).
-- **`huggingface`** (ou `hungifface`): Requer `HUGGINGFACE_API_KEY`.
-- **Diversos outros suportados nativamente**: `cohere`, `azure`, `bedrock`, `vertex`, `palm`.
+**Resolução Dinâmica de Chaves (NOVIDADE):**
+Não é mais necessário depender de configurações arbitrárias para encontrar as chaves de acesso. O Pangolin agora resolve nativamente a sua chave de autenticação lendo o arquivo `.env` (localizado na raiz do projeto) e procurando por uma combinação dinâmica construída com o *nome do provider* em caixa alta, seguido de `_API_KEY`. Da mesma maneira resolve variáveis base URL com `_BASE_URL`.
+
+**Exemplos de provedores suportados e suas chaves esperadas:**
+- **`openai`**: O sistema procurará automaticamente por `OPENAI_API_KEY`.
+- **`anthropic`**: Procurará por `ANTHROPIC_API_KEY`.
+- **`gemini`** (ou `google`): Procurará por `GEMINI_API_KEY`.
+- **`ollama`** (ou `local`): Modelos hospedados localmente via Ollama (pode receber o `OLLAMA_BASE_URL` para mudar a porta padrão).
+- **`huggingface`**: Procurará por `HUGGINGFACE_API_KEY`.
+- **`deepseek`**: Procurará por `DEEPSEEK_API_KEY`.
+- **Diversos outros suportados nativamente construídos dinamicamente**: `cohere`, `azure`, `bedrock`, `vertex`, `palm`, `groq`, etc. (Cada um seguindo o padrão, ex: `GROQ_API_KEY`).
 
 ### 💡 Técnicas de Prompt
 Você pode definir as técnicas a serem executadas pelos modelos diretamente no arquivo de configuração do seu projeto ou modificá-las via terminal.
@@ -145,16 +149,64 @@ As técnicas padrão embarcadas no sistema e suas reações são:
 
 ## 🤖 Como rodar múltiplos modelos em um mesmo projeto (Multi-target)
 
+---
+
+## 🏗️ Arquitetura Agnóstica: Criando Configurações de Tarefas (TaskConfig)
+
+O Pangolin foi remodelado para adotar uma **Arquitetura Totalmente Agnóstica ao Domínio**. Isso significa que as técnicas de prompting (Zero-Shot, Self-Hint, Hypothesis Testing, etc.) **não contêm código hardcoded** de um domínio específico (como regras de Cibersegurança ou categorias do NIST). Em vez disso, toda a inteligência e o contexto da tarefa são injetados externamente através de objetos JSON/YAML (`TaskConfig`).
+
+### O Fluxo de Execução
+
+Como detalhado na modelagem do framework:
+1. **DataFrame Row:** Uma linha de dados (ex: CSV de emails) entra no sistema.
+2. **build_input_text(row):** O plugin constrói a entrada dinamicamente usando a chave `input_builder` definida no seu JSON.
+3. **execute():** O plugin abstrato do framework gera o prompt em tempo de execução incorporando as categorias, system_prompt e few_shot_examples do `TaskConfig`.
+4. **send_prompt(prompt):** O modelo LLM configurado (via `api_model` ou `local_model`) processa a entrada.
+5. **extract_answer(response):** A classe base extrai e padroniza a saída do modelo baseando-se nas regras da chave `extraction` (seja por JSON ou template).
+6. **Resultado Estruturado:** Uma resposta formatada é acoplada às métricas e salva.
+
+### Como usar o framework corretamente para sua Tarefa
+
+Para que o framework resolva um problema novo (classificação de spam, análise de sentimento, triagem jurídica, etc.), você precisa fornecer um arquivo JSON de configuração (ex: `task_config.json`) em seu projeto com a seguinte estrutura esperada pelas classes base:
+
+```json
+{
+  "system_prompt": "You are an email filtering assistant determining whether an incoming email is 'SPAM' or 'LEGITIMATE'.",
+  "categories": [
+    "SPAM",
+    "LEGITIMATE"
+  ],
+  "unknown_category": "UNKNOWN",
+  "input_builder": "Sender: {Sender} / Subject: {Subject} / Body: {Body}",
+  "output_format": "You must output valid JSON: {\"category\": \"<SPAM or LEGITIMATE>\", \"explanation\": \"<why>\"}",
+  "extraction": {
+    "method": "json"
+  },
+  "context_hints_triggers": {
+    "SPAM": "Focus on urgency words, requested payments, or unfamiliar sketchy domains.",
+    "LEGITIMATE": "Check if it comes from an internal corporate domain or known contacts."
+  },
+  "few_shot_examples": [
+    {
+      "input": "Sender: boss@company.com / Subject: Q3 Report / Body: Here it is.",
+      "output": "{\"category\": \"LEGITIMATE\", \"explanation\": \"Internal sender.\"}"
+    }
+  ]
+}
+```
+
+Ao carregar esse JSON nos seus scripts/CLI, você o repassa ao instanciar os `PromptPlugins` (que herdam de `BasePromptPlugin(model_plugin, task_config)`). O framework fará o intermédio entre as regras desta JSON e as estratégias complexas de raciocínio de cada plugin automaticamente!
+
 Graças ao processamento em cadeia, você pode definir em seu `config.yaml` um Array (Lista) de múltiplos modelos. Todos serão validados e irão competir entre si iterando com a técnica especificada.
 
 Veja os exemplos de configuração para rodar automaticamente os potentes **DeepSeek**, **GPT-5**, **Gemini 3** e **Claude Sonnet** em sequência:
 
 ```yaml
 models:
-  # O DeepSeek e a maioria das APIs Open Source mantêm compatibilidade
-  # estrita com as rotas/APIs do provador 'openai'. Defina a OPENAI_API_BASE na raiz.
-  - name: deepseek-chat
-    provider: openai
+  # DeepSeek - Modelo nativo e focado em alta velocidade/raciocínio
+  # Requer a variável DEEPSEEK_API_KEY declarada na raiz.
+  - name: deepseek-v4-flash
+    provider: deepseek
     temperature: 0.2
     max_tokens: 2048
 
@@ -183,7 +235,7 @@ prompt:
 
 Quando você rodar `./pg.sh run` com aquele arquivo ali, ele vai aplicar a técnica `progressive_hint` sequencialmente nos 4 LLMs, gravar 4 outputs unificados, extrair 4 métricas, e relatar todas juntas!
 
-> **Nota para provedores alternativos (DeepSeek, Groq, Together, etc)**: Para modelos que forneçam compatibilidade técnica mas mudam apenas os *endpoints*, basta sinalizar o `provider: openai` e definir uma variável `OPENAI_API_BASE=https://api.deepseek.com/v1` em seu `.env` contendo a rota correta do emissor exógeno. O sistema injetará normalmente por cima do motor lite.
+> **Nota**: Para redirecionar e customizar domínios exógenos em qualquer API particular (ex: Groq, Together), sempre declare por `.env`, seguindo o padrão, como `GROQ_BASE_URL=https://api.groq.com/openai/v1`. O sistema injetará a lógica do motor sem falhas.
 
 ---
 

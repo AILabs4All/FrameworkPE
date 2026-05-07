@@ -1,0 +1,34 @@
+technique: progressive_hint
+name: "Progressive Hint"
+description: "Progressive Hint Prompting - Gera dicas progressivas para melhorar a classificação"
+acronym: "PPH"
+strategy: progressive_hint
+prompt_text: |
+  {input_framework}
+
+  {output_format}
+
+hint_template: |
+  Hint: The previous prediction was {previous_category}.
+  Please reconsider the incident and answer again.
+
+  Incident:
+  {input_framework}
+
+  {output_format}
+
+output_format: |
+  If classification is not possible, return:
+  Category: Unknown
+  Explanation: Unknown
+
+  OUTPUT:
+  Category: [NIST code]
+  Explanation: [Justification for the chosen category]
+params:
+  max_hints: 4
+  quality_threshold: 0.9
+  mode: php
+extraction:
+  method: json
+  unknown_category: UNKNOWN

@@ -13,38 +13,21 @@ from .base_model import BaseModel
 class APIModel(BaseModel):
     """Modelo para provedores acessados via API (OpenAI, Hugging Face, etc)."""
 
-    PROVIDER_ENV_MAP = {
-        "openai": "OPENAI_API_KEY",
-        "azure_openai": "AZURE_OPENAI_API_KEY",
-        "huggingface": "HUGGINGFACE_API_KEY",
-        "cohere": "COHERE_API_KEY",
-        "gemini": "GEMINI_API_KEY",
-        "google": "GEMINI_API_KEY",
-    }
-
-    PROVIDER_BASE_ENV_MAP = {
-        "openai": "OPENAI_BASE_URL",
-        "azure_openai": "AZURE_OPENAI_BASE_URL",
-    }
-
-    PROVIDER_PREFIX = {
-        "huggingface": "huggingface/",
-        "gemini": "gemini/",
-        "google": "gemini/",
-    }
-
     def setup_model(self) -> None:
-        self.api_key = self._resolve_secret(self.config.get("api_key"))
+        env_key = f"{self.provider.upper()}_API_KEY"
+        
+        config_key = self.config.get("api_key")
+        self.api_key = self._resolve_secret(config_key) if config_key else os.getenv(env_key)
+
         self.api_base = self.config.get("base_url") or self.config.get("api_base")
         self.deployment = self.config.get("deployment")
         self.extra_params: Dict[str, Any] = self.config.get("extra_params", {})
 
-        env_key = self.PROVIDER_ENV_MAP.get(self.provider)
-        if env_key and self.api_key:
-            os.environ.setdefault(env_key, self.api_key)
+        if self.api_key:
+            os.environ[env_key] = self.api_key
 
-        env_base = self.PROVIDER_BASE_ENV_MAP.get(self.provider)
-        if env_base and self.api_base:
+        env_base = f"{self.provider.upper()}_BASE_URL"
+        if self.api_base:
             os.environ.setdefault(env_base, self.api_base)
 
         self.logger.info(
@@ -104,7 +87,15 @@ class APIModel(BaseModel):
             return getattr(response, "content", "") or ""
 
     def _get_model_identifier(self) -> str:
-        prefix = self.PROVIDER_PREFIX.get(self.provider, "")
+        # Fallback generico usando nomenclatura padrao LiteLLM (provider/model)
+        if self.provider not in ("openai", "azure_openai", "cohere", "anthropic"):
+            prefix = f"{self.provider}/"
+        else:
+            prefix = ""
+            
+        if prefix and self.model_name.startswith(prefix):
+            return self.model_name
+            
         return f"{prefix}{self.model_name}" if prefix else self.model_name
 
     @staticmethod

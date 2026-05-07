@@ -4,6 +4,8 @@ import tqdm
 from pathlib import Path
 
 from .plugin_manager import PluginManager
+from plugins.prompts.schema_prompt_plugin import SchemaPromptPlugin
+from plugins.prompts.config import PromptConfigFactory
 from utils.logger import setup_logger
 from utils.file_handlers import load_data_files, save_results, validate_columns
 from utils.metrics import MetricsCollector
@@ -92,34 +94,18 @@ class SecurityIncidentFramework:
         all_results = []
         for technique in techniques:
             self.logger.info(f"Processando com técnica: {technique}")
-            
-            # Configura técnica de prompt
-            prompt_map = {
-                'progressive_hint': 'ProgressiveHintPlugin',
-                'self_hint': 'SelfHintPlugin',
-                'progressive_rectification': 'ProgressiveRectificationPlugin',
-                'hypothesis_testing': 'HypothesisTestingPlugin',
-                'free_prompt': 'FreePromptPlugin',
-                'zeroshot': 'ZeroShotPlugin',
-                'zeroshot_b': 'ZeroShotPlugin'
-            }
-            
-            prompt_plugin_name = prompt_map.get(technique)
-            if not prompt_plugin_name:
-                self.logger.warning(f"Plugin não encontrado para a técnica: {technique}")
+
+            try:
+                prompt_schema = self.project.load_prompt_schema(technique)
+                prompt_config = PromptConfigFactory.create(prompt_schema)
+                prompt_instance = SchemaPromptPlugin(model_instance, prompt_config)
+            except Exception as e:
+                self.logger.warning(f"Erro ao carregar técnica de prompt '{technique}': {e}")
                 continue
-                
-            prompt_instance = self.plugin_manager.create_prompt_instance(
-                prompt_plugin_name, model_instance
-            )
-            if not prompt_instance:
-                self.logger.warning(f"Erro ao criar instância do prompt para a técnica: {technique}")
-                continue
-            
+
             # Processa incidentes
-            prompt_config_dict = {"plugin": prompt_plugin_name, "default_params": {}}
             results = self._process_all_incidents(
-                dataframes, columns, prompt_instance, prompt_config_dict, **kwargs
+                dataframes, columns, prompt_instance, **kwargs
             )
             
             # Adiciona informação da técnica aos resultados
@@ -165,41 +151,29 @@ class SecurityIncidentFramework:
         return summary
     
     def _process_all_incidents(self, dataframes: List[pd.DataFrame], columns: List[str], 
-                              prompt_instance: Any, prompt_config: Dict[str, Any], **kwargs) -> List[Dict[str, Any]]:
+                              prompt_instance: Any, **kwargs) -> List[Dict[str, Any]]:
         """Processa todos os incidentes dos DataFrames."""
         results = []
         total_rows = sum(len(df) for df in dataframes)
         
-        # Mescla parâmetros padrão com kwargs
-        params = prompt_config.get("default_params", {})
-        params.update(kwargs)
-        
         with tqdm.tqdm(total=total_rows, desc="Processando incidentes") as pbar:
             for df in dataframes:
                 for index, row in df.iterrows():
-                    # Captura o ID obrigatório da linha
                     incident_id = row.get('id')
                     if pd.isna(incident_id):
                         self.logger.warning(f"ID ausente na linha {index}, usando índice como fallback")
                         incident_id = f"row_{index}"
                     
-                    # Constrói prompt
                     prompt = self._build_prompt(row, columns)
                     
-                    # Executa técnica de prompt passando o ID no contexto
                     try:
-                        params['incident_id'] = incident_id  # Adiciona ID aos parâmetros
-                        incident_results = prompt_instance.execute(prompt, row, columns, **params)
-                        
-                        # Garante que cada resultado tenha o ID
+                        incident_results = prompt_instance.execute(prompt, row, columns, incident_id=incident_id, **kwargs)
                         for result in incident_results:
                             if 'id' not in result:
                                 result['id'] = incident_id
-                        
                         results.extend(incident_results)
                     except Exception as e:
                         self.logger.error(f"Erro ao processar incidente {incident_id}: {e}")
-                        # Adiciona resultado de erro com ID
                         results.append({
                             "id": incident_id,
                             "informacoes_das_colunas": self._build_incident_info(row, columns),

@@ -40,6 +40,7 @@ class PangolinProject:
         self.env_path = self.project_path / ".env"
         self.data_dir = self.project_path / "data"
         self.prompts_dir = self.project_path / "prompts"
+        self.schema_dir = self.project_path / "schema"
         self.logs_dir = self.project_path / "logs"
         self.metrics_dir = self.project_path / "logs"
         self.model_dir = self.project_path / "model"
@@ -64,6 +65,7 @@ class PangolinProject:
             self.project_path.mkdir(parents=True, exist_ok=False)
             self.data_dir.mkdir(exist_ok=False)
             self.prompts_dir.mkdir(exist_ok=False)
+            self.schema_dir.mkdir(exist_ok=False)
             self.model_dir.mkdir(exist_ok=False)
             self.logs_dir.mkdir(exist_ok=False)
             self.output_dir.mkdir(exist_ok=False)
@@ -71,6 +73,7 @@ class PangolinProject:
             # Cria arquivos __init__.py para tornar diretórios módulos Python
             (self.prompts_dir / "__init__.py").touch()
             (self.model_dir / "__init__.py").touch()
+            (self.schema_dir / ".gitkeep").touch()
             
             # Cria config.yaml padrão
             default_config = config or self._get_default_config()
@@ -111,6 +114,7 @@ class PangolinProject:
             "prompt": {
                 "technique": ["progressive_hint"],
                 "custom_prompts_dir": "prompts",
+                "schema_dir": "schema",
                 "available_techniques": [
                     "self_hint",
                     "zeroshot"
@@ -145,6 +149,7 @@ Projeto de teste e comparacao de prompts.
 {self.project_name}/
 ├── data/           # Base de dados (coloque seus arquivos CSV/JSON/XLSX aqui)
 ├── prompts/        # Arquivos de prompts customizados
+├── schema/         # Definições de técnicas de prompt em YAML
 ├── model/          # Diretorio do modelo
 ├── logs/           # Logs de execucao
 ├── output/         # Resultados das execucoes
@@ -289,6 +294,8 @@ Criado em: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
         if "prompt" in config:
             if "technique" not in config["prompt"]:
                 errors.append("Campo 'prompt.technique' é obrigatório")
+            if "schema_dir" in config["prompt"] and not isinstance(config["prompt"]["schema_dir"], str):
+                errors.append("Campo 'prompt.schema_dir' deve ser uma string")
         
         # Valida output
         if "output" in config:
@@ -318,8 +325,8 @@ Criado em: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
             # Importa plugins de modelos especificados
             model_files = self._import_model_plugins(config)
             
-            # Importa plugins de prompts especificados
-            prompt_files = self._import_prompt_plugins(config)
+            # Garante existência da pasta de schemas e copia schemas padrão quando necessário
+            schema_files = self._import_prompt_plugins(config)
             
             # Atualiza metadados
             config["project"]["last_applied"] = datetime.now().isoformat()
@@ -333,7 +340,7 @@ Criado em: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                 "config": config,
                 "imported_files": {
                     "models": model_files,
-                    "prompts": prompt_files
+                    "schemas": prompt_files
                 }
             }
             
@@ -400,61 +407,27 @@ Criado em: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
     
     def _import_prompt_plugins(self, config: Dict[str, Any]) -> list[str]:
         """
-        Importa arquivos de plugins de prompts para o projeto.
+        Garante que a pasta de schemas exista e copie schemas padrão ao criar um projeto.
         
         Args:
             config: Configuração do projeto
             
         Returns:
-            Lista de arquivos importados
+            Lista de schemas importados
         """
         imported = []
-        technique = config.get('prompt', {}).get('technique', '')
+        self.schema_dir.mkdir(exist_ok=True)
         
-        if not technique:
+        framework_schemas = Path(__file__).resolve().parent.parent / "schemas"
+        if not framework_schemas.exists():
             return imported
         
-        # Se technique é uma lista, pega o primeiro
-        if isinstance(technique, list):
-            techniques = technique
-        else:
-            techniques = [technique]
-        
-        # Mapeia técnicas para arquivos
-        technique_map = {
-            'progressive_hint': 'progressive_hint.py',
-            'progressive_rectification': 'progressive_rectification.py',
-            'self_hint': 'self_hint.py',
-            'hypothesis_testing': 'hypothesis_testing.py',
-            'free_prompt': 'free_prompt.py',
-            'zeroshot': 'zeroshot_b.py'
-        }
-        
-        # Caminho fonte (plugins do framework)
-        framework_plugins = Path(__file__).resolve().parent.parent / "plugins" / "prompts"
-        
-        for tech in techniques:
-            plugin_file = technique_map.get(tech)
-            if not plugin_file:
-                continue
-                
-            source_file = framework_plugins / plugin_file
-            
-            if source_file.exists():
-                # Copia para o diretório prompts/ do projeto
-                dest_file = self.prompts_dir / plugin_file
-                if not dest_file.exists():
-                    shutil.copy2(source_file, dest_file)
-                    imported.append(plugin_file)
-                    self.logger.info(f"Plugin de prompt importado: {plugin_file}")
-        
-        # Sempre importa base_prompt.py
-        base_source = framework_plugins / "base_prompt.py"
-        base_dest = self.prompts_dir / "base_prompt.py"
-        if base_source.exists() and not base_dest.exists():
-            shutil.copy2(base_source, base_dest)
-            imported.append("base_prompt.py")
-            self.logger.info(f"Base prompt importado: base_prompt.py")
+        for schema_file in framework_schemas.glob("*.yaml"):
+            dest_file = self.schema_dir / schema_file.name
+            if not dest_file.exists():
+                shutil.copy2(schema_file, dest_file)
+                imported.append(schema_file.name)
+                self.logger.info(f"Schema de prompt importado: {schema_file.name}")
         
         return imported
     
@@ -487,6 +460,7 @@ Criado em: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
             "directories": {
                 "data": str(self.data_dir),
                 "prompts": str(self.prompts_dir),
+                "schema": str(self.schema_dir),
                 "model": str(self.model_dir),
                 "logs": str(self.logs_dir),
                 "output": str(self.output_dir)
@@ -511,6 +485,34 @@ Criado em: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
             Path completo para o arquivo
         """
         return self.output_dir / filename
+
+    def get_prompt_schema_path(self, prompt_name: str) -> Path:
+        """
+        Retorna o caminho para o schema YAML de uma técnica de prompt.
+        """
+        schema_name = f"{prompt_name}.yaml"
+        schema_path = self.schema_dir / schema_name
+        if schema_path.exists():
+            return schema_path
+        # Fallback para schemas internos do framework
+        builtin = Path(__file__).resolve().parent.parent / "schemas" / schema_name
+        return builtin
+
+    def load_prompt_schema(self, prompt_name: str) -> Dict[str, Any]:
+        """
+        Carrega um schema YAML de prompt a partir do diretório do projeto ou do framework.
+        """
+        schema_path = self.get_prompt_schema_path(prompt_name)
+        if not schema_path.exists():
+            raise FileNotFoundError(f"Schema de prompt não encontrado: {prompt_name} ({schema_path})")
+
+        with open(schema_path, 'r', encoding='utf-8') as f:
+            data = yaml.safe_load(f)
+
+        if not isinstance(data, dict):
+            raise ValueError(f"Schema de prompt inválido ou vazio: {schema_path}")
+
+        return data
     
     def get_metrics_path(self, filename: str) -> Path:
         """

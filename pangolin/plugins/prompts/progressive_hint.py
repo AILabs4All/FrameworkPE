@@ -32,7 +32,7 @@ class ProgressiveHintPlugin(BasePromptPlugin):
         resposta_anterior = resposta
         
         resultados = []
-        informacoes_das_colunas = self.build_incident_info(data_row, columns)
+        informacoes_das_colunas = self.build_input_text(data_row, columns)
         
         # Se max_hints é 0, retorna apenas a primeira resposta
         if max_hints == 0:

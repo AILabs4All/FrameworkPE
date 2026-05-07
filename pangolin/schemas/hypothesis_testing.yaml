@@ -1,0 +1,142 @@
+technique: hypothesis_testing
+name: "Hypothesis Testing"
+description: "Hypothesis Testing Prompting - Testa hipóteses para cada categoria sistematicamente"
+acronym: "HTP"
+strategy: hypothesis_testing
+prompt_text: |
+  Security Incident Analysis System - HTP
+  Incident Description:
+  "{input_framework}"
+
+  Instructions:
+  For NIST category {category} and keywords {keywords_str}, perform the following steps:
+
+  1. True Hypothesis:
+    - Assume the incident belongs to this category. Justify based on the description and keywords.
+    - Indicate whether the hypothesis is SUPPORTED or NOT SUPPORTED.
+
+  2. False Hypothesis:
+    - Assume the incident does NOT belong to this category. Justify based on the lack of evidence.
+    - Indicate whether the hypothesis is SUPPORTED or NOT SUPPORTED.
+
+  Return the hypotheses in the following format:
+      True Hypothesis:[SUPPORTED/NOT SUPPORTED]
+      False Hypothesis:[SUPPORTED/NOT SUPPORTED]
+
+  Final Classification Decision:
+    - If the True Hypothesis is SUPPORTED and the False Hypothesis is NOT SUPPORTED, return:
+      Category: {category}
+      Explanation: [Justification for the chosen category]
+    - Otherwise, return:
+      Category: UNKNOWN
+      Explanation: UNKNOWN
+
+output_format: "Category: [CAT1-CAT12 or UNKNOWN]\nExplanation: [Detailed justification]"
+params:
+  max_iter: 12
+  quality_threshold: 0.9
+key_words:
+  CAT1:
+    - phishing
+    - brute force
+    - unauthorized access
+    - compromised password
+    - credential theft
+    - account compromise
+    - token
+    - oauth
+    - ssh
+    - suspicious login
+  CAT2:
+    - malware
+    - ransomware
+    - trojan
+    - virus
+    - spyware
+    - rootkit
+    - infection
+    - malicious code
+  CAT3:
+    - ddos
+    - dos
+    - denial of service
+    - flood
+    - syn flood
+    - udp flood
+    - botnet
+    - api outage
+    - site down
+  CAT4:
+    - data leak
+    - exposed data
+    - leaked credentials
+    - sensitive information
+    - data exfiltration
+    - unauthorized disclosure
+  CAT5:
+    - exploit
+    - vulnerability
+    - cve
+    - remote execution
+    - sql injection
+    - injection
+    - rce
+    - security flaw
+  CAT6:
+    - insider
+    - internal abuse
+    - employee
+    - internal leak
+    - sabotage
+    - intentional action
+    - staff
+  CAT7:
+    - social engineering
+    - phishing
+    - vishing
+    - fraud
+    - deception
+    - spoofing
+    - manipulation
+    - scam
+    - ceo fraud
+  CAT8:
+    - physical access
+    - equipment theft
+    - burglary
+    - unauthorized entry
+    - broken door
+    - physical breach
+  CAT9:
+    - modification
+    - defacement
+    - unauthorized change
+    - erased
+    - altered record
+    - tampering
+  CAT10:
+    - misuse
+    - resource abuse
+    - crypto mining
+    - compromised server
+    - malware hosting
+    - unauthorized use
+  CAT11:
+    - third party
+    - supplier
+    - partner
+    - vendor
+    - supply chain
+    - external breach
+    - saas issue
+  CAT12:
+    - intrusion attempt
+    - scan
+    - reconnaissance
+    - probing
+    - port scan
+    - blocked exploit
+    - failed attempt
+extraction:
+  method: json
+  unknown_category: UNKNOWN

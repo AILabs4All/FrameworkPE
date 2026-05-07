@@ -20,7 +20,7 @@ class BaseModel(ABC):
         self.logger = setup_logger(self.__class__.__name__)
         self.token_metrics = TokenMetrics()
         self.provider: str = config.get("provider", "unknown")
-        self.model_name: str = config.get("model", "")
+        self.model_name: str = config.get("model") or config.get("name", "")
         self.temperature: float = float(config.get("temperature", 0.7))
         self.max_tokens: int = int(config.get("max_tokens", 2048))
         self.rate_limit: float = float(config.get("rate_limit", 0.0))

@@ -23,7 +23,7 @@ class ProgressiveRectificationPlugin(BasePromptPlugin):
         Explanation: [Justification for the chosen category]
         """
         
-        informacoes_das_colunas = self.build_incident_info(data_row, columns)
+        informacoes_das_colunas = self.build_input_text(data_row, columns)
         
         # Captura ID do incidente
         incident_id = kwargs.get('incident_id')

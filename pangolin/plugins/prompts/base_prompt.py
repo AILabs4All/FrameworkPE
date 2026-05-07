@@ -5,11 +5,14 @@ import re
 import json
 from utils.logger import setup_logger
 
+
+
 class BasePromptPlugin(ABC):
     """Classe base para todos os plugins de técnicas de prompt."""
     
-    def __init__(self, model_plugin):
+    def __init__(self, model_plugin, task_config: dict = None):
         self.model_plugin = model_plugin
+        self.task = task_config or {}
         self.logger = setup_logger(self.__class__.__name__)
     
     @abstractmethod
@@ -22,57 +25,71 @@ class BasePromptPlugin(ABC):
         """Retorna o nome da técnica de prompt."""
         pass
     
-    def build_incident_info(self, row: pd.Series, columns: List[str]) -> str:
-        """Constrói string com informações do incidente."""
+    def build_input_text(self, row: pd.Series, columns: List[str] = None) -> str:
+        """Constrói string de entrada baseada no input_builder configurado."""
+        input_template = self.task.get("input_builder", "")
+        if input_template:
+            # Substitui os placeholders usando os valores da linha
+            format_dict = {col: str(row.get(col, "[ausente]")) for col in row.index}
+            try:
+                return input_template.format(**format_dict)
+            except KeyError as e:
+                self.logger.warning(f"Placeholder {e} do input_builder não encontrado nos dados.")
+                return input_template
+
+        # Fallback genérico caso não tenha template
+        cols_to_use = columns if columns else row.index
         return " / ".join([
-            f"{coluna}: {row[coluna]}" if coluna in row and pd.notnull(row[coluna]) 
-            else f"{coluna}: [valor ausente]" 
-            for coluna in columns
+            f"{col}: {row[col]}" if pd.notnull(row[col]) else f"{col}: [ausente]"
+            for col in cols_to_use
         ])
     
-    def extract_security_incidents(self, texto: str) -> Dict[str, str]:
-        """Extrai categoria e explicação do texto usando regex."""
+    def extract_answer(self, texto: str) -> Dict[str, str]:
+        """Extrai a resposta utilizando a configuração de extração (json ou regex)."""
+        extraction = self.task.get("extraction", {})
+        method = extraction.get("method", "json")
+        
+        unknown_cat = self.task.get("unknown_category", "UNKNOWN")
 
-        
-        # Verifica se é JSON válido
-        try:
-            dados = json.loads(texto)
-            if "Category" in dados and "Explanation" in dados:
+        if method == "json":
+            try:
+                # Remove espaços limpos e blocos de markdown de json (ex: ```json)
+                cleaned = texto.strip()
+                if cleaned.startswith("```json"):
+                    cleaned = cleaned[7:]
+                if cleaned.startswith("```"):
+                    cleaned = cleaned[3:]
+                if cleaned.endswith("```"):
+                    cleaned = cleaned[:-3]
+                
+                dados = json.loads(cleaned)
                 return {
-                    "Category": dados["Category"].strip(),
-                    "Explanation": dados["Explanation"].strip()
+                    "category": str(dados.get("category", unknown_cat)).strip(),
+                    "explanation": str(dados.get("explanation", "unknown")).strip()
                 }
-        except json.JSONDecodeError:
-            pass
+            except json.JSONDecodeError:
+                pass
         
-        # Caso não seja JSON, usa regex
-        padrao = r"(?:\*\*Category:\*\*|Category:)\s*(.*?)\s*(?:\*\*Explanation:\*\*|Explanation:|Explanation:)\s*(.*?)(?=\n|$)"
-        matches = re.findall(padrao, texto, re.DOTALL)
+        # Fallback ou método template_regex
+        cat_group = extraction.get("category_group", "category")
+        exp_group = extraction.get("explanation_group", "explanation")
+        
+        # Regex baseada na expectativa de pares Chave: Valor
+        padrao = r"(?:\*\*Category:\*\*|Category:)\s*(.*?)\s*(?:\*\*Explanation:\*\*|Explanation:)\s*(.*?)(?=\n|$)"
+        if "regex_pattern" in extraction:
+             padrao = extraction["regex_pattern"]
+
+        matches = re.findall(padrao, texto, re.DOTALL | re.IGNORECASE)
         
         if matches:
-            ultima_ocorrencia = matches[-1]
+            ultima = matches[-1]
             return {
-                "Category": self._extract_cat(ultima_ocorrencia[0].replace("*", "").replace("\n", "").strip()),
-                "Explanation": ultima_ocorrencia[1].replace("*", "").replace("\n", "").strip()
+                "category": ultima[0].replace("*", "").strip(),
+                "explanation": ultima[1].replace("*", "").strip()
             }
-        else:
-            return {"Category": "unknown", "Explanation": "unknown"}
-    
-    def _extract_cat(self, texto: str) -> str:
-        """Extrai código CAT (CAT1 a CAT12) do texto."""
         
-        match = re.search(r'\bCAT([1-9]|1[0-2])\b', texto.upper())
-        if match:
-            return f"CAT{match.group(1)}"
-        return texto
-    
-    def calculate_rouge_score(self, resposta_anterior: str, nova_resposta: str) -> float:
-        """Calcula o ROUGE Score entre duas respostas."""
-        try:
-            from rouge_score import rouge_scorer
-            scorer = rouge_scorer.RougeScorer(['rougeL'], use_stemmer=True)
-            scores = scorer.score(resposta_anterior, nova_resposta)
-            return scores['rougeL'].fmeasure
-        except ImportError:
-            self.logger.warning("Rouge Score não disponível. Usando comparação simples.")
-            return 1.0 if resposta_anterior.lower() == nova_resposta.lower() else 0.0
+        return {"category": unknown_cat, "explanation": "unknown"}
+
+def _clean_category(texto: str) -> str:
+    texto = texto.replace("*", "").replace("\n", "").strip()
+    return texto

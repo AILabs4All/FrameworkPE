@@ -1,0 +1,31 @@
+technique: self_hint
+name: "Self Hint"
+description: "Self Hint Prompting - O modelo gera seu próprio plano e se auto-refina"
+acronym: "SHP"
+strategy: self_hint
+prompt_text: |
+  {input_framework}
+
+  {plan_instructions}
+
+  {output_format}
+
+plan_instructions: |
+  Let's first understand the problem and devise a plan to solve it step by step.
+  Then execute the plan and classify the incident accordingly.
+
+output_format: |
+  If classification is not possible, return:
+  Category: Unknown
+  Explanation: Unknown
+
+  OUTPUT:
+  Category: [NIST code]
+  Explanation: [Justification for the chosen category]
+params:
+  max_iter: 4
+  quality_threshold: 0.9
+  mode: shp
+extraction:
+  method: json
+  unknown_category: UNKNOWN

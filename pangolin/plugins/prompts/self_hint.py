@@ -39,7 +39,7 @@ class SelfHintPlugin(BasePromptPlugin):
         categoria_anterior = self.extract_security_incidents(response)["Category"]
         
         resultados = []
-        informacoes_das_colunas = self.build_incident_info(data_row, columns)
+        informacoes_das_colunas = self.build_input_text(data_row, columns)
         
         # Loop de refinamento
         for i in range(max_iter):

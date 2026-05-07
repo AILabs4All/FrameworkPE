@@ -88,7 +88,7 @@ def run_command(
         if max_tokens:
             technique_params['max_tokens'] = max_tokens
 
-        print(f"\n🚀 Rodando experimento")
+        print(f"\nRodando experimento")
         print(f"Modelos: {[m.get('name') for m in selected_models]}")
         print(f"Tecnicas: {technique}")
         print(f"Colunas: {columns}\n")
@@ -96,7 +96,7 @@ def run_command(
         all_results = []
         for model_config in selected_models:
             model_name = model_config.get('name')
-            print(f"\n⚡ Processando com modelo: {model_name}")
+            print(f"\nProcessando com modelo: {model_name}")
             
             results = framework.process_incidents(
                 input_dir=str(project.data_dir),
@@ -108,7 +108,7 @@ def run_command(
             )
             all_results.append(results)
 
-        print("\n✅ Concluido")
+        print("\nConcluido")
         if all_results:
             print(f"Output final: {all_results[-1].get('output_file')}")
 

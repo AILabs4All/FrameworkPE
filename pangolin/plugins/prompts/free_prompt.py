@@ -50,7 +50,7 @@ class FreePromptPlugin(BasePromptPlugin):
         Returns:
             Lista com as respostas do modelo
         """
-        incident = self.build_incident_info(data_row, columns)
+        incident = self.build_input_text(data_row, columns)
         incident_id = kwargs.get('incident_id')
         
         # Constrói o prompt completo
@@ -70,13 +70,13 @@ class FreePromptPlugin(BasePromptPlugin):
         response = self.model_plugin.send_prompt(full_prompt, **send_kwargs)
         
         # Processa a resposta
-        processed_response = self._process_response(response)
+        processed_response = self.extract_answer(response)
         
         return [{
             "Response": response,
             "Processed": processed_response,
-            "Category": processed_response.get("Category", "Unknown"),
-            "Explanation": processed_response.get("Explanation", "Unknown")
+            "Category": processed_response.get("category", "Unknown"),
+            "Explanation": processed_response.get("explanation", "Unknown")
         }]
     
     def _build_free_prompt(self, incident: str) -> str:
