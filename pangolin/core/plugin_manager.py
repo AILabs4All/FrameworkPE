@@ -1,5 +1,5 @@
 from typing import Dict, Any, Optional, Type
-from utils.logger import setup_logger
+from .observability.logger import setup_logger
 
 # Importa os plugins de modelo
 from plugins.models.api_model import APIModel

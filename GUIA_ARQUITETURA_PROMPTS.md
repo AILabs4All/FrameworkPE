@@ -1,266 +1,597 @@
-# Guia de Refatoração: Arquitectura Modular de Prompts com Schemas YAML
+# Pangolin — Guia de Arquitetura e Prompt Engineering
 
-## Visão Geral
+Este documento descreve a arquitetura interna do framework Pangolin, o fluxo completo de execução, o sistema de plugins e como estender o framework com novas técnicas de prompt.
 
-O FrameworkPE foi completamente refatorado para suportar uma arquitetura modular de técnicas de prompt engineering baseada em schemas YAML. Este guia descreve como o sistema funciona e como criar novas técnicas de prompt.
+---
 
-## Arquitetura
+## Índice
 
-### Estrutura do Projeto
+- [Visão Geral da Arquitetura](#visão-geral-da-arquitetura)
+- [Estrutura de Diretórios do Framework](#estrutura-de-diretórios-do-framework)
+- [Componentes Principais](#componentes-principais)
+- [Fluxo Completo de Execução](#fluxo-completo-de-execução)
+- [Sistema de Schemas YAML](#sistema-de-schemas-yaml)
+- [Sistema de Plugins](#sistema-de-plugins)
+- [Estratégias de Prompt em Detalhe](#estratégias-de-prompt-em-detalhe)
+- [Como Criar uma Nova Técnica](#como-criar-uma-nova-técnica)
+- [Observabilidade e Métricas](#observabilidade-e-métricas)
+- [Padrões de Design Utilizados](#padrões-de-design-utilizados)
 
-Cada projeto Pangolin agora possui a seguinte estrutura:
+---
+
+## Visão Geral da Arquitetura
+
+O Pangolin é estruturado em três camadas:
 
 ```
-project_name/
-├── data/           # Base de dados (CSV/JSON/XLSX)
-├── model/          # Módulos de modelos de IA
-├── prompts/        # Scripts Python de prompts (legado)
-├── schema/         # Definições YAML das técnicas de prompt
-├── logs/           # Logs de execução e métricas
-├── output/         # Resultados das execuções
-└── config.yaml     # Configuração do projeto
+┌─────────────────────────────────────────────────┐
+│                 CLI (Typer)                      │
+│   pg init │ pg apply │ pg run │ pg info ...      │
+└───────────────────┬─────────────────────────────┘
+                    │
+┌───────────────────▼─────────────────────────────┐
+│              Core Framework                      │
+│  PangolinProject  │  PangolinFramework           │
+│  ConfigLoader     │  PluginManager               │
+│  SchemaValidator  │  MetricsCollector            │
+└───────────────────┬─────────────────────────────┘
+                    │
+┌───────────────────▼─────────────────────────────┐
+│              Plugin Layer                        │
+│  Models: APIModel │ LocalModel │ HuggingfaceModel│
+│  Prompts: SchemaPromptPlugin (genérico)          │
+│  Schemas: progressive_hint.yaml │ self_hint.yaml │
+│           hypothesis_testing.yaml │ zeroshot.yaml│
+└─────────────────────────────────────────────────┘
 ```
 
-### Componentes Principais
+**Princípio fundamental:** as técnicas de prompting **não contêm lógica de domínio hardcoded**. Todo o contexto (categorias, palavras-chave, exemplos, system prompt) é injetado via schemas YAML e configuração do projeto. Isso torna o framework aplicável a qualquer tarefa de classificação ou análise textual.
 
-1. **Schemas YAML** (`schema/`)
-   - Definem técnicas de prompt de forma declarativa
-   - Contêm prompts, parâmetros, exemplos e instruções
+---
 
-2. **Configurações de Prompt** (`config/prompt_config.py`)
-   - Dataclasses que representam schemas carregados
-   - Validação e conversão de dados
+## Estrutura de Diretórios do Framework
 
-3. **Plugin Genérico** (`schema_prompt_plugin.py`)
-   - Executa qualquer técnica de prompt definida por schema
-   - Implementa estratégias genéricas
+```
+FrameworkPE/
+├── pangolin/
+│   ├── cli.py                        # Ponto de entrada da CLI (Typer)
+│   ├── commands/                     # Definições dos comandos CLI
+│   │   ├── init.py
+│   │   ├── apply.py
+│   │   ├── run.py
+│   │   ├── list_cmd.py
+│   │   ├── info.py
+│   │   └── destroy.py
+│   ├── cmd/                          # Lógica de negócio dos comandos
+│   │   ├── init.py                   # cmd_init()
+│   │   ├── apply.py                  # cmd_apply()
+│   │   └── run.py                    # run_command()
+│   ├── core/
+│   │   ├── framework.py              # PangolinFramework (orquestrador)
+│   │   ├── plugin_manager.py         # PluginManager
+│   │   ├── config/
+│   │   │   ├── loader.py             # Carregador de config JSON/YAML
+│   │   │   └── schema_validator.py   # Validador de schemas YAML
+│   │   ├── project/
+│   │   │   ├── pangolin_project.py   # PangolinProject (ciclo de vida)
+│   │   │   └── scaffold.py           # Funções de criação de estrutura
+│   │   ├── io/
+│   │   │   ├── file_handlers.py      # Carregamento/salvamento de dados
+│   │   │   └── response_parser.py    # Parser de respostas dos modelos
+│   │   └── observability/
+│   │       ├── logger.py             # Sistema de logging estruturado
+│   │       └── metrics.py            # Coleta de métricas
+│   ├── plugins/
+│   │   ├── models/
+│   │   │   ├── base_model.py         # Classe abstrata BaseModel
+│   │   │   ├── api_model.py          # APIModel via LiteLLM
+│   │   │   ├── local_model.py        # LocalModel via Ollama
+│   │   │   └── hungguiface_model.py  # HuggingfaceModel
+│   │   └── prompts/
+│   │       ├── base_prompt.py        # BasePromptPlugin (abstrata)
+│   │       ├── schema_prompt_plugin.py  # Plugin genérico (executa qualquer schema)
+│   │       └── config/
+│   │           └── prompt_config.py  # Dataclasses + PromptConfigFactory
+│   └── schemas/                      # Schemas YAML padrão do framework
+│       ├── progressive_hint.yaml
+│       ├── self_hint.yaml
+│       ├── hypothesis_testing.yaml
+│       ├── progressive_rectification.yaml
+│       ├── free_prompt.yaml
+│       └── zeroshot.yaml
+├── README.md
+├── GUIA_ARQUITETURA_PROMPTS.md       # Este arquivo
+├── SCHEMAS_REFERENCIA_RAPIDA.md
+├── docs/
+│   ├── CONFIG_REFERENCE.md
+│   ├── DATASETS_GUIDE.md
+│   └── NEW_PROJECT_GUIDE.md
+├── setup.py
+└── requirements.txt
+```
 
-4. **Validador** (`prompt_schema_validator.py`)
-   - Valida schemas YAML antes de uso
+---
 
-## Estrutura de um Schema YAML
+## Componentes Principais
 
-### Exemplo: Progressive Hint
+### `PangolinProject` — Ciclo de vida do projeto
+
+Localização: `pangolin/core/project/pangolin_project.py`
+
+Gerencia todo o ciclo de vida de um projeto isolado:
+
+| Método | Descrição |
+|---|---|
+| `create()` | Cria a estrutura de diretórios e o `config.yaml` padrão |
+| `apply()` | Valida o config, importa plugins e schemas para o projeto |
+| `destroy()` | Remove completamente o projeto do disco |
+| `load_config()` | Lê e retorna o `config.yaml` |
+| `validate_config()` | Valida estrutura e campos obrigatórios, retorna lista de erros |
+| `load_prompt_schema(name)` | Carrega um schema YAML (projeto → framework como fallback) |
+| `get_info()` | Retorna metadados e estatísticas do projeto |
+
+**Resolução de schema (prioridade):**
+```
+projeto/schema/<tecnica>.yaml   ←  primeiro
+pangolin/schemas/<tecnica>.yaml ←  fallback
+```
+
+### `PangolinFramework` — Orquestrador de execução
+
+Localização: `pangolin/core/framework.py`
+
+Coordena o processamento completo de dados:
+
+```python
+framework.process_incidents(
+    input_dir="data/",
+    columns=["description"],
+    model_config={"name": "gpt-4o-mini", "provider": "openai", ...},
+    prompt_techniques=["progressive_hint", "self_hint"],
+    output_format="csv"
+)
+```
+
+Responsabilidades:
+- Carrega e valida os dados de entrada
+- Instancia o modelo via `PluginManager`
+- Para cada técnica: carrega schema → cria config → instancia plugin → processa dados
+- Salva resultados e métricas
+
+### `PluginManager` — Registro de plugins
+
+Localização: `pangolin/core/plugin_manager.py`
+
+Mantém o registro de plugins de modelo e cria instâncias conforme o provedor configurado.
+
+Mapeamento de provedores para plugins:
+
+| Provedor | Plugin |
+|---|---|
+| `openai`, `anthropic`, `gemini`, `google`, `cohere`, `azure`, `bedrock`, `vertex`, `palm`, `deepseek`, `groq` | `APIModel` (via LiteLLM) |
+| `ollama`, `local` | `LocalModel` |
+| `huggingface` | `HuggingfaceModel` |
+
+### `SchemaPromptPlugin` — Plugin genérico de prompts
+
+Localização: `pangolin/plugins/prompts/schema_prompt_plugin.py`
+
+Um único plugin capaz de executar **qualquer** técnica de prompt definida em schema YAML. Recebe uma instância de `PromptConfig` e delega para o método de estratégia correspondente.
+
+```
+SchemaPromptPlugin.execute()
+    ├── strategy == "progressive_hint"       → _execute_progressive_hint()
+    ├── strategy == "self_hint"              → _execute_self_hint()
+    ├── strategy == "hypothesis_testing"     → _execute_hypothesis_testing()
+    ├── strategy == "progressive_rectification" → _execute_progressive_rectification()
+    ├── strategy == "free_prompt"            → _execute_free_prompt()
+    └── strategy == "zeroshot"              → _execute_zeroshot()
+```
+
+### `PromptConfigFactory` — Fábrica de configurações
+
+Localização: `pangolin/plugins/prompts/config/prompt_config.py`
+
+Converte um dicionário YAML em um dataclass tipado:
+
+```python
+schema_dict = yaml.safe_load(open("schema/progressive_hint.yaml"))
+config = PromptConfigFactory.create(schema_dict)
+# Retorna: ProgressiveHintConfig(max_hints=4, quality_threshold=0.9, ...)
+```
+
+Registro interno:
+
+| Estratégia | Dataclass |
+|---|---|
+| `progressive_hint` | `ProgressiveHintConfig` |
+| `self_hint` | `SelfHintConfig` |
+| `hypothesis_testing` | `HtpConfig` |
+| `progressive_rectification` | `ProgressiveRectificationConfig` |
+| `free_prompt` | `FreePromptConfig` |
+| `zeroshot` | `ZeroShotConfig` |
+
+---
+
+## Fluxo Completo de Execução
+
+```
+┌──────────────┐
+│  pg run      │
+└──────┬───────┘
+       │
+       ▼
+┌──────────────────────────────────────────┐
+│  run_command()  [cmd/run.py]             │
+│  • Lê config.yaml                        │
+│  • Resolve colunas, técnicas, modelos    │
+│  • Instancia PangolinFramework           │
+└──────┬───────────────────────────────────┘
+       │
+       ▼
+┌──────────────────────────────────────────┐
+│  process_incidents()  [core/framework.py]│
+│                                          │
+│  1. load_data_files(input_dir)           │
+│     → Carrega CSV/JSON/XLSX para DataFrame│
+│                                          │
+│  2. validate_columns(df, columns)        │
+│     → Verifica se as colunas existem     │
+│                                          │
+│  3. PluginManager.create_model_instance()│
+│     → Instancia APIModel / LocalModel    │
+│                                          │
+│  4. Para cada TÉCNICA configurada:       │
+│     a. project.load_prompt_schema(name)  │
+│        → Lê YAML do projeto ou framework │
+│     b. PromptConfigFactory.create(schema)│
+│        → Converte dict → dataclass tipado│
+│     c. SchemaPromptPlugin(model, config) │
+│        → Instancia o plugin genérico     │
+│                                          │
+│     5. Para cada LINHA do dataset:       │
+│        a. build_input_text(row, columns) │
+│           → Monta texto do input         │
+│        b. plugin.execute(text, row, ...)  │
+│           → Executa a estratégia de prompt│
+│        c. modelo.send_prompt(prompt)     │
+│           → Chama a API / modelo local   │
+│        d. extract_answer(response)       │
+│           → Extrai categoria + explicação│
+│        e. Coleta métricas de tokens      │
+│           → input_tokens, output_tokens  │
+│                                          │
+│  6. save_results(results, output_dir)    │
+│     → CSV / JSON / XLSX                  │
+│                                          │
+│  7. metrics_collector.persist()          │
+│     → Salva JSON de métricas em logs/    │
+└──────────────────────────────────────────┘
+```
+
+---
+
+## Sistema de Schemas YAML
+
+Os schemas YAML são o coração da extensibilidade do Pangolin. Eles definem completamente uma técnica de prompt: o texto do prompt, parâmetros, templates extras e configuração de extração de resposta.
+
+### Localização dos schemas
+
+```
+pangolin/schemas/         ← Schemas padrão do framework (não edite)
+meu_projeto/schema/       ← Schemas do projeto (sobrescrevem os padrão)
+```
+
+Se o projeto tiver um schema com o mesmo nome que o do framework, o schema do projeto tem prioridade. Isso permite customizar uma técnica para um experimento específico sem alterar o código original.
+
+### Estrutura de um schema
 
 ```yaml
-technique: progressive_hint
-name: "Progressive Hint"
-description: "Gera dicas progressivas para melhorar a classificação"
-acronym: "PPH"
-strategy: progressive_hint
+# ─── Identificação ───────────────────────────────────────────────
+technique: nome_da_tecnica      # Identificador único (deve coincidir com o nome do arquivo)
+name: "Nome Legível"            # Nome descritivo para exibição
+description: "O que ela faz"    # Descrição completa da abordagem
+acronym: "NT"                   # Sigla usada em logs e saídas
 
+# ─── Execução ────────────────────────────────────────────────────
+strategy: nome_da_tecnica       # Identifica qual método do plugin será chamado
+
+# ─── Prompt ──────────────────────────────────────────────────────
 prompt_text: |
-  {input_framework}
+  Texto do prompt principal.
+  Use placeholders entre chaves: {input_framework}
   {output_format}
 
-hint_template: |
-  Hint: The previous prediction was {previous_category}.
-  Please reconsider: {input_framework}
+# ─── Formato de saída ────────────────────────────────────────────
+output_format: |
+  Category: [código ou rótulo]
+  Explanation: [justificativa]
+
+# ─── Parâmetros da técnica ───────────────────────────────────────
+params:
+  max_iter: 4
+  quality_threshold: 0.9
+
+# ─── Extração de resposta ────────────────────────────────────────
+extraction:
+  method: json              # "json" ou "regex"
+  unknown_category: UNKNOWN
+```
+
+### Placeholders disponíveis
+
+| Placeholder | Disponível em | Descrição |
+|---|---|---|
+| `{input_framework}` | Todos | Texto de entrada da linha do dataset |
+| `{output_format}` | Todos | Bloco de formato de resposta do schema |
+| `{system_prompt}` | `free_prompt`, `zeroshot` | Prompt de sistema configurável |
+| `{categories_info}` | `free_prompt`, `zeroshot` | Lista de categorias formatada |
+| `{examples_section}` | `free_prompt` | Bloco de exemplos formatado |
+| `{context_hints}` | `free_prompt` | Dicas de contexto por palavra-chave |
+| `{category}` | `hypothesis_testing` | Categoria sendo testada na iteração atual |
+| `{keywords_str}` | `hypothesis_testing` | Palavras-chave da categoria atual |
+| `{previous_category}` | `progressive_hint` | Resultado da iteração anterior |
+| `{plan_instructions}` | `self_hint` | Instruções para o modelo elaborar o plano |
+| `{rejected_category}` | `progressive_rectification` | Categoria(s) rejeitada(s) para retificação |
+| `{subcategory}` | `progressive_rectification` | Subcategoria para mascaramento |
+
+---
+
+## Sistema de Plugins
+
+### Plugin de Modelo
+
+Todos os plugins de modelo herdam de `BaseModel`:
+
+```python
+class BaseModel:
+    def send_prompt(self, prompt: str) -> str: ...
+    def get_model_info(self) -> dict: ...
+```
+
+**APIModel** usa LiteLLM e aceita qualquer provedor compatível. A chamada é construída dinamicamente com base no padrão `provider/model_name`.
+
+**LocalModel** se comunica com o Ollama via API HTTP local.
+
+**HuggingfaceModel** carrega modelos diretamente do HuggingFace Hub.
+
+### Isolamento de plugins por projeto
+
+Ao executar `pg apply`, os arquivos de plugin necessários são copiados do framework para a pasta `model/` do projeto. Isso garante que:
+
+1. O projeto é autossuficiente e portátil
+2. Customizações no plugin do projeto não afetam outros projetos
+3. Versões de plugin ficam fixadas para reprodutibilidade
+
+---
+
+## Estratégias de Prompt em Detalhe
+
+### Progressive Hint (PHP)
+
+Refina a classificação iterativamente fornecendo ao modelo a predição anterior como "dica":
+
+```
+1ª chamada: prompt_text(input)              → resposta_1
+2ª chamada: hint_template(input, resposta_1) → resposta_2
+3ª chamada: hint_template(input, resposta_2) → resposta_3
+...até max_hints ou quality_threshold atingido
+```
+
+Parâmetros configuráveis: `max_hints`, `quality_threshold`, `mode`.
+
+### Self-Hint (SHP)
+
+O modelo elabora seu próprio plano antes de responder:
+
+```
+1ª chamada: "Entenda o problema e crie um plano de análise" → plano
+2ª chamada: prompt + plano → resposta final
+...até max_iter ou quality_threshold atingido
+```
+
+Parâmetros: `max_iter`, `quality_threshold`, `mode`.
+
+### Hypothesis Testing (HTP)
+
+Testa hipóteses sistemáticas para cada categoria definida em `key_words`:
+
+```
+Para cada categoria em key_words:
+  → "Hipótese verdadeira: o input pertence a {categoria}? [SUPPORTED/NOT SUPPORTED]"
+  → "Hipótese falsa:      o input NÃO pertence a {categoria}? [SUPPORTED/NOT SUPPORTED]"
+
+Decisão: categoria onde H_true=SUPPORTED e H_false=NOT SUPPORTED
+```
+
+Parâmetros: `max_iter`, `quality_threshold`, `key_words` (obrigatório).
+
+### Progressive Rectification (PRP)
+
+Usa mascaramento de palavras-chave e retificação progressiva:
+
+```
+1ª chamada: prompt(input)                          → resposta_1
+   → Mascara palavras-chave da categoria_1 no texto
+2ª chamada: rectification_template(input_mascarado, "not: categoria_1") → resposta_2
+   → Mascara palavras-chave da categoria_2
+3ª chamada: rectification_template(input_mascarado, "not: categoria_1, categoria_2") → ...
+```
+
+Parâmetros: `max_iter`, `quality_threshold`, `mode`, `key_words`.
+
+### Free Prompt (FREE)
+
+Prompt flexível e totalmente configurável com suporte a exemplos, categorias e dicas de contexto:
+
+```
+[system_prompt]
+CATEGORIES: [categories_info]
+[examples_section]   ← se use_examples=true
+[context_hints]      ← se use_context_hints=true
+INPUT: [input_framework]
+[output_format]
+```
+
+Parâmetros: `use_examples`, `use_structured_output`, `use_context_hints`, `temperature_override`.
+
+### Zero-Shot (ZS)
+
+Classificação direta em uma única chamada, sem exemplos nem refinamento iterativo. Útil como linha de base:
+
+```
+[system_prompt]
+[categories_info]
+INPUT: [input_framework]
+[output_format]
+```
+
+Parâmetros: `mode`, `temperature_override` (padrão: `0.0`).
+
+---
+
+## Como Criar uma Nova Técnica
+
+### Passo 1 — Criar o schema YAML
+
+Crie `meu_projeto/schema/minha_tecnica.yaml`:
+
+```yaml
+technique: minha_tecnica
+name: "Minha Técnica"
+description: "Descrição detalhada do que a técnica faz"
+acronym: "MT"
+strategy: minha_tecnica    # Deve coincidir com o método no plugin
+
+prompt_text: |
+  Analise o seguinte texto:
+  {input_framework}
+
   {output_format}
 
 output_format: |
-  If classification is not possible, return: Category: Unknown
-  OUTPUT:
-  Category: [NIST code]
-  Explanation: [Justification]
+  Category: [categoria]
+  Explanation: [justificativa]
 
 params:
-  max_hints: 4
-  quality_threshold: 0.9
-  mode: php
+  max_iter: 3
+  meu_parametro: valor
 
 extraction:
   method: json
   unknown_category: UNKNOWN
 ```
 
-### Campos Obrigatórios
+### Passo 2 — Criar o dataclass de configuração (opcional)
 
-- **technique**: Identificador único da técnica
-- **name**: Nome descritivo
-- **description**: Descrição da abordagem
-- **acronym**: Acrônimo/código da técnica
-- **strategy**: Tipo de implementação (progressive_hint, hypothesis_testing, etc.)
-- **prompt_text**: Template do prompt principal com placeholders
-
-### Campos Opcionais
-
-- **output_format**: Formato esperado da resposta
-- **params**: Parâmetros da técnica (iterations, thresholds, etc.)
-- **extraction**: Configuração de como extrair dados da resposta
-- **categories**: Lista de categorias NIST
-- **examples**: Exemplos de classificação
-- **key_words**: Palavras-chave por categoria (para HTP)
-- **templates**: Templates adicionais (hint, masking, etc.)
-- **input_builder**: Padrão de construção da entrada
-- **metadata**: Metadados da técnica
-
-## Placeholders Disponíveis
-
-O sistema suporta os seguintes placeholders em templates:
-
-- `{input_framework}`: Texto do incidente a classificar
-- `{output_format}`: Formato esperado da saída
-- `{category}`: Categoria sendo testada (HTP)
-- `{keywords_str}`: Palavras-chave formatadas (HTP)
-- `{previous_category}`: Categoria anterior (Progressive Hint)
-- `{plan_instructions}`: Instruções de planejamento (Self Hint)
-- `{rejected_category}`: Categorias rejeitadas (Rectification)
-- Qualquer campo em `params` ou `metadata`
-
-## Como Criar uma Nova Técnica
-
-### Passo 1: Criar o Schema YAML
-
-Crie um arquivo em `schema/nova_tecnica.yaml`:
-
-```yaml
-technique: nova_tecnica
-name: "Minha Nova Técnica"
-description: "Descrição completa"
-acronym: "NT"
-strategy: nova_tecnica  # Identifica qual executa
-
-prompt_text: |
-  Seu prompt aqui com placeholders.
-  {input_framework}
-  {output_format}
-
-params:
-  param1: valor1
-  param2: valor2
-
-extraction:
-  method: json
-```
-
-### Passo 2: Criar a Classe de Configuração (Opcional)
-
-Se precisar de lógica especial, crie em `config/prompt_config.py`:
+Se a técnica tiver parâmetros específicos, adicione em `pangolin/plugins/prompts/config/prompt_config.py`:
 
 ```python
 @dataclass
 class MinhaTecnicaConfig(PromptConfig):
-    param1: str = ""
-    param2: int = 0
+    max_iter: int = 3
+    meu_parametro: str = "valor"
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
         base = PromptConfig.from_dict(data)
+        params = data.get("params", {})
         return cls(
-            # ... campos base ...
-            param1=data.get("param1", ""),
-            param2=int(data.get("params", {}).get("param2", 0))
+            **{k: v for k, v in vars(base).items()},
+            max_iter=int(params.get("max_iter", 3)),
+            meu_parametro=params.get("meu_parametro", "valor"),
         )
 ```
 
-### Passo 3: Adicionar ao Factory
+### Passo 3 — Registrar no Factory
 
-No `PromptConfigFactory`:
+No mesmo arquivo, registre no `PromptConfigFactory`:
 
 ```python
 class PromptConfigFactory:
     registry: Dict[str, Any] = {
-        # ...
-        "nova_tecnica": MinhaTecnicaConfig
+        # ... entradas existentes ...
+        "minha_tecnica": MinhaTecnicaConfig,
     }
 ```
 
-### Passo 4: Implementar Estratégia no Plugin
+### Passo 4 — Implementar o método de execução
 
-No `SchemaPromptPlugin`, adicione método:
-
-```python
-def _execute_nova_tecnica(self, incident_text: str, data_row, columns, **kwargs):
-    # Sua implementação aqui
-    return [{"categoria": "...", "explicacao": "..."}]
-```
-
-## Carregamento Automático de Schemas
-
-Quando você:
-
-1. Cria um novo projeto: schemas padrão são copiados automaticamente
-2. Define técnicas em `config.yaml`: o sistema carrega os schemas correspondentes
-3. Executa `pg run --technique nova_tecnica`: busca `schema/nova_tecnica.yaml`
-
-## Validação de Schemas
-
-Para validar todos os schemas de um projeto:
+No `SchemaPromptPlugin`, adicione:
 
 ```python
-from core.prompt_schema_validator import PromptSchemaValidator
+def _execute_minha_tecnica(self, incident_text: str, data_row, columns, **kwargs):
+    config = self.prompt_config  # MinhaTecnicaConfig
+    results = []
 
-results = PromptSchemaValidator.validate_directory("schema/")
-PromptSchemaValidator.print_validation_report(results)
+    for i in range(config.max_iter):
+        prompt = config.prompt_text.format(
+            input_framework=incident_text,
+            output_format=config.output_format,
+        )
+        response = self.model.send_prompt(prompt)
+        answer = self._extract_answer(response)
+        results.append(answer)
+
+        if self._quality_ok(answer):
+            break
+
+    return results
 ```
 
-## Integração com o Framework
+### Passo 5 — Usar a nova técnica
 
-O framework carrega schemas automaticamente:
+Em `config.yaml`:
 
-```python
-# No comando 'run'
-prompt_schema = project.load_prompt_schema(technique)
-prompt_config = PromptConfigFactory.create(prompt_schema)
-prompt_instance = SchemaPromptPlugin(model_instance, prompt_config)
-results = prompt_instance.execute(prompt, row, columns, incident_id=incident_id)
+```yaml
+prompt:
+  technique: [minha_tecnica]
+  schema_dir: schema
 ```
-
-## Benefícios da Arquitetura
-
-1. **Sem Hardcoding**: Novas técnicas apenas via YAML
-2. **Configurável**: Todos os parâmetros em schemas
-3. **Extensível**: Factory pattern para novas estratégias
-4. **Validável**: Schemas são validados antes de uso
-5. **Genérico**: Um plugin executa qualquer técnica
-6. **Independente**: Técnicas não dependem umas das outras
-
-## Exemplos de Uso
-
-### Adicionar Hypothesis Testing ao Projeto
-
-1. Criar `schema/hypothesis_testing.yaml`
-2. Em `config.yaml`, adicionar: `technique: [hypothesis_testing]`
-3. Executar: `pg run`
-
-### Criar Técnica Customizada
-
-1. Criar `schema/minha_tecnica_customizada.yaml` com seu prompt
-2. Implementar `_execute_minha_tecnica_customizada` no plugin (se necessário)
-3. Usar em `config.yaml`
-
-### Compartilhar Schemas
-
-Copie o arquivo YAML para outro projeto no diretório `schema/`:
 
 ```bash
-cp projeto1/schema/tecnica.yaml projeto2/schema/
+pg apply
+pg run
 ```
 
-## Troubleshooting
+---
 
-### "Schema not found"
+## Observabilidade e Métricas
 
-- Verifique se o arquivo existe em `schema/`
-- Verifique o nome em `config.yaml` vs `schema/*.yaml`
-- Use `pg list-schemas` para listar disponíveis
+### Logs
 
-### "Unknown strategy"
+O framework usa um logger estruturado configurado em `pangolin/core/observability/logger.py`. Logs são salvos em `projeto/logs/` com timestamp.
 
-- Estratégia não está registrada no `PromptConfigFactory`
-- Verifique o campo `strategy` no YAML
-- Implemente `_execute_<strategy>` no plugin
+Níveis de log utilizados:
+- `INFO` — progresso normal (técnica iniciada, modelo carregado, dados salvos)
+- `WARNING` — situações não-críticas (schema não encontrado no projeto, fallback usado)
+- `ERROR` — erros de execução (falha ao carregar dados, erro de API)
 
-### Validação falha
+### Métricas coletadas
 
-- Execute: `PromptSchemaValidator.validate_directory("schema/")`
-- Revise os campos obrigatórios
-- Cheque placeholders necessários
+O `MetricsCollector` registra automaticamente para cada execução:
 
-## Próximos Passos
+| Métrica | Descrição |
+|---|---|
+| `input_tokens` | Tokens enviados ao modelo |
+| `output_tokens` | Tokens gerados pelo modelo |
+| `total_tokens` | Soma de input + output |
+| `execution_time` | Tempo total de processamento (segundos) |
+| `memory_usage` | Pico de memória RAM usada (MB) |
+| `model_name` | Modelo utilizado |
+| `technique` | Técnica de prompt aplicada |
+| `num_records` | Número de registros processados |
 
-1. Migre técnicas legais para schemas YAML
-2. Crie técnicas customizadas via schemas
-3. Compartilhe schemas entre projetos
-4. Estenda com novas estratégias conforme necessário
+As métricas são salvas em `projeto/logs/metrics_<timestamp>.json`.
+
+---
+
+## Padrões de Design Utilizados
+
+| Padrão | Onde | Propósito |
+|---|---|---|
+| **Strategy** | `SchemaPromptPlugin` + estratégias | Permite trocar técnicas de prompt sem alterar o código cliente |
+| **Factory** | `PromptConfigFactory` | Cria o dataclass correto a partir do identificador de estratégia |
+| **Plugin Architecture** | `PluginManager` + `BaseModel` | Extensão de modelos sem modificar o núcleo |
+| **Template Method** | `BasePromptPlugin` | Define o esqueleto de execução; subclasses preenchem os detalhes |
+| **Dataclass** | `PromptConfig` e subclasses | Configuração tipada, validada e imutável |

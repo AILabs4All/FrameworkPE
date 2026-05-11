@@ -15,12 +15,11 @@ class SchemaPromptPlugin(BasePromptPlugin):
     def execute(self, prompt: str, data_row: pd.Series, columns: List[str], **kwargs) -> List[Dict[str, Any]]:
         incident_text = self.build_input_text(data_row, columns)
         strategy = self.config.strategy
-        incident_id = kwargs.get("incident_id")
         execution_fn = getattr(self, f"_execute_{strategy}", None)
         if execution_fn is None:
             raise NotImplementedError(f"Strategy de prompt não implementada: {strategy}")
 
-        return execution_fn(incident_text, data_row, columns, incident_id=incident_id, **kwargs)
+        return execution_fn(incident_text, data_row, columns, **kwargs)
 
     def get_name(self) -> str:
         return self.config.acronym or self.config.technique
@@ -282,20 +281,16 @@ class SchemaPromptPlugin(BasePromptPlugin):
     def _build_context_hints(self, incident_text: str) -> str:
         if not getattr(self.config, "use_context_hints", False):
             return ""
-        hints = []
-        if any(word in incident_text.lower() for word in ["failed", "login", "brute", "password"]):
-            hints.append("• Could be intrusion attempt or account compromise.")
-        if any(word in incident_text.lower() for word in ["malware", "virus", "ransomware", "trojan"]):
-            hints.append("• Looks like a malware incident.")
-        if any(word in incident_text.lower() for word in ["ddos", "dos", "flood", "unavailable"]):
-            hints.append("• Consider denial of service attack.")
-        if any(word in incident_text.lower() for word in ["data", "leak", "disclosure", "breach"]):
-            hints.append("• Investigate potential data leak.")
-        if any(word in incident_text.lower() for word in ["exploit", "vulnerability", "cve", "injection"]):
-            hints.append("• This may involve vulnerability exploitation.")
-        if not hints:
+        hints_config = getattr(self.config, "context_hints", [])
+        if not hints_config:
             return ""
-        return "ANALYSIS HINTS:\n" + "\n".join(hints)
+        lower = incident_text.lower()
+        hints = [
+            item["hint"]
+            for item in hints_config
+            if any(w.lower() in lower for w in item.get("keywords", []))
+        ]
+        return "ANALYSIS HINTS:\n" + "\n".join(hints) if hints else ""
 
     def _get_subcategories(self, category: str) -> List[str]:
         if hasattr(self.config, "key_words") and isinstance(getattr(self.config, "key_words"), dict):

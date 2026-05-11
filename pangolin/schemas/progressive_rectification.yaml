@@ -9,10 +9,10 @@ prompt_text: |
   {output_format}
 
 masking_template: |
-  Replace all occurrences of the word '{subcategory}' with 'X' in the incident text.
+  Replace all occurrences of the word '{subcategory}' with 'X' in the input text.
 
 rectification_template: |
-  Incident: {input_framework}
+  Input: {input_framework}
   The answer is probably not: {rejected_category}
   Let's think step by step to reclassify.
 
@@ -24,61 +24,23 @@ output_format: |
   Explanation: Unknown
 
   OUTPUT:
-  Category: [NIST code]
+  Category: [category code or label]
   Explanation: [Justification for the chosen category]
+
 params:
   max_iter: 4
   quality_threshold: 0.9
   mode: prp
-key_words:
-  CAT1:
-    - phishing
-    - brute force
-    - unauthorized access
-  CAT2:
-    - malware
-    - ransomware
-    - trojan
-  CAT3:
-    - ddos
-    - dos
-    - denial of service
-  CAT4:
-    - data leak
-    - exposed data
-    - leaked credentials
-  CAT5:
-    - exploit
-    - vulnerability
-    - cve
-  CAT6:
-    - insider
-    - internal abuse
-    - sabotage
-  CAT7:
-    - social engineering
-    - phishing
-    - vishing
-  CAT8:
-    - physical access
-    - equipment theft
-    - burglary
-  CAT9:
-    - modification
-    - defacement
-    - unauthorized change
-  CAT10:
-    - misuse
-    - resource abuse
-    - crypto mining
-  CAT11:
-    - third party
-    - supplier
-    - partner
-  CAT12:
-    - intrusion attempt
-    - scan
-    - reconnaissance
+
+# key_words: define your domain-specific categories and associated keywords here.
+# Used to mask category-specific terms during rectification.
+# Example:
+#   key_words:
+#     CategoryA:
+#       - keyword1
+#       - keyword2
+key_words: {}
+
 extraction:
   method: json
   unknown_category: UNKNOWN

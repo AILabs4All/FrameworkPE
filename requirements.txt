@@ -1,10 +1,10 @@
 pandas>=2.1.4
 openpyxl>=3.1.2
 openai>=1.6.1
-transformers>=4.36.2
-torch>=2.1.2
+#transformers>=4.36.2
+#torch>=2.1.2
 rouge-score>=0.1.2
-huggingface-hub>=0.20.1
+#huggingface-hub>=0.20.1
 psutil>=5.9.7
 tqdm>=4.66.1
 tiktoken>=0.5.2

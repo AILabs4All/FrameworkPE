@@ -1,80 +1,71 @@
 from .base_prompt import BasePromptPlugin
-from typing import Dict, Any, List
+from .config.prompt_config import SelfHintConfig
+from typing import Dict, Any, List, Optional
 import pandas as pd
 
+
 class SelfHintPlugin(BasePromptPlugin):
-    """Plugin para Self Hint Prompting."""
-    
+    """Self Hint Prompting — o modelo cria um plano e se auto-refina iterativamente."""
+
+    def __init__(self, config: SelfHintConfig, model_plugin, task_config: Optional[dict] = None):
+        super().__init__(model_plugin, task_config)
+        self.config = config
+
     def execute(self, prompt: str, data_row: pd.Series, columns: List[str], **kwargs) -> List[Dict[str, Any]]:
-        """
-        Implementa Self Hint Prompting.
-        O modelo gera seu próprio plano e então refina baseado nas próprias respostas.
-        """
-        max_iter = kwargs.get("max_iter", 4)
-        limite_qualidade = kwargs.get("limite_qualidade", 0.9)
-        
-        # Adiciona formatação de saída
-        output_format = """
-        If classification is not possible, return:
-        Category: Unknown
-        Explanation: Unknown
-        
-        OUTPUT:
-        Category: [NIST code]
-        Explanation: [Justification for the chosen category]
-        """
-        
-        # Primeira fase: Gera plano
-        plano = "Let's first understand the problem and devise a plan to solve the problem. Then, let's carry out the plan and solve the problem step by step."
-        prompt_inicial = f"{prompt} {plano}"
-        
-        # Captura ID do incidente
-        incident_id = kwargs.get('incident_id')
-        
-        # Gera plano intermediário
-        plano_intermediario = self.model_plugin.send_prompt(prompt_inicial, mode="shp", incident_id=incident_id)
-        
-        # Executa plano inicial
-        response = self.model_plugin.send_prompt(f"{prompt_inicial} {output_format}", mode="shp", incident_id=incident_id)
-        categoria_anterior = self.extract_security_incidents(response)["Category"]
-        
-        resultados = []
-        informacoes_das_colunas = self.build_input_text(data_row, columns)
-        
-        # Loop de refinamento
+        max_iter = int(kwargs.get("max_iter", self.config.max_iter))
+        threshold = float(kwargs.get("quality_threshold", self.config.quality_threshold))
+        plan_instructions = (
+            self.config.plan_instructions
+            or self.config.templates.get("plan_instructions", "")
+        )
+        output_format = self.config.output_format or ""
+        incident_text = self.build_input_text(data_row, columns)
+        incident_id = kwargs.get("incident_id")
+
+        initial_prompt = self.config.prompt_text.format(
+            input_framework=prompt,
+            plan_instructions=plan_instructions,
+            output_format=output_format
+        )
+        # Primeira passagem: geração do plano (resultado descartado intencionalmente)
+        self.model_plugin.send_prompt(initial_prompt, mode="shp", incident_id=incident_id)
+        response = self.model_plugin.send_prompt(initial_prompt, mode="shp", incident_id=incident_id)
+        previous_category = self.extract_answer(response).get("category", "Unknown")
+
         for i in range(max_iter):
-            # Refina com base na categoria anterior
-            prompt_reflexao = f"{prompt} {plano_intermediario} The category is: {categoria_anterior} {output_format}"
-            response = self.model_plugin.send_prompt(prompt_reflexao, mode="shp", incident_id=incident_id)
-            
-            incident = self.extract_security_incidents(response)
-            categoria_atual = incident["Category"]
-            
-            # Verifica critérios de parada
-            rouge_score = self.calculate_rouge_score(categoria_anterior, categoria_atual)
-            
-            if (i + 1 == max_iter) or rouge_score >= limite_qualidade:
-                resultados.append({
+            refinement_prompt = self.config.prompt_text.format(
+                input_framework=prompt,
+                plan_instructions=plan_instructions,
+                previous_category=previous_category,
+                output_format=output_format
+            )
+            response = self.model_plugin.send_prompt(refinement_prompt, mode="shp", incident_id=incident_id)
+            extracted = self.extract_answer(response)
+            category = extracted.get("category", "Unknown")
+            score = self.calculate_rouge_score(previous_category, category)
+
+            if (i + 1) == max_iter or score >= threshold:
+                return [{
                     "id": incident_id,
-                    "informacoes_das_colunas": informacoes_das_colunas,
-                    "categoria": categoria_atual,
-                    "explicacao": incident["Explanation"],
-                    "rouge": rouge_score,
+                    "informacoes_das_colunas": incident_text,
+                    "categoria": category,
+                    "explicacao": extracted.get("explanation", "Unknown"),
+                    "rouge": score,
                     "iteracao": i + 1
-                })
-                return resultados
-            else:
-                # Prepara próxima iteração
-                categoria_anterior = categoria_atual
-                prompt_inicial = f"{prompt} {plano} The category is: {categoria_anterior}"
-                plano_intermediario = self.model_plugin.send_prompt(prompt_inicial, mode="shp", incident_id=incident_id)
-        
-        return resultados
-    
+                }]
+            previous_category = category
+
+        return [{
+            "id": incident_id,
+            "informacoes_das_colunas": incident_text,
+            "categoria": previous_category,
+            "explicacao": "Limite de iterações atingido sem convergência",
+            "rouge": 0.0,
+            "iteracao": max_iter
+        }]
+
     def get_name(self) -> str:
-        """Retorna o nome da técnica."""
-        return "self_hint"
-    
+        return self.config.acronym
+
     def get_description(self) -> str:
-        """Retorna descrição da técnica."""
-        return "Self Hint Prompting - O modelo gera seu próprio plano e se auto-refina"
+        return self.config.description

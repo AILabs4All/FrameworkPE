@@ -13,47 +13,37 @@ prompt_text: |
 
   {context_hints}
 
-  INCIDENT TO CLASSIFY:
+  INPUT:
   {input_framework}
 
   {output_format}
 
 system_prompt: |
-  You are a cybersecurity expert specializing in incident classification.
-  Analyze the incident, choose the best NIST category, and justify your answer.
+  You are an expert analyst. Analyze the input and provide a classification with justification.
 
 output_format: |
   REQUIRED OUTPUT FORMAT:
-  Category: [CAT1-CAT12 or Unknown]
+  Category: [category code or label]
   Explanation: [Detailed justification for the chosen category]
+
 params:
-  use_examples: true
+  use_examples: false
   use_structured_output: true
   use_context_hints: false
   temperature_override: 0.2
-categories:
-  - code: CAT1
-    name: Account Compromise
-    description: unauthorized access to user or administrator accounts
-  - code: CAT2
-    name: Malware
-    description: infection by malicious code
-  - code: CAT3
-    name: Denial of Service Attack
-    description: making systems unavailable
-  - code: CAT4
-    name: Data Leak
-    description: unauthorized disclosure of sensitive data
-examples:
-  - incident: "Multiple failed SSH login attempts detected from external IP."
-    category: CAT12
-    explanation: "Network scanning and brute force attempts represent an intrusion attempt."
-  - incident: "Ransomware detected on workstation, files encrypted with .crypto extension."
-    category: CAT2
-    explanation: "Malware infection with ransomware indicators."
-  - incident: "Employee accessed and downloaded customer database without authorization."
-    category: CAT6
-    explanation: "Internal user performing unauthorized actions."
+
+categories: []
+
+examples: []
+
+# context_hints: loaded from schema when use_context_hints is true.
+# Each entry must have 'keywords' (list of strings) and 'hint' (string).
+# Example:
+#   context_hints:
+#     - keywords: ["error", "failed", "timeout"]
+#       hint: "• This may indicate a system or connectivity failure."
+context_hints: []
+
 extraction:
   method: json
   unknown_category: UNKNOWN

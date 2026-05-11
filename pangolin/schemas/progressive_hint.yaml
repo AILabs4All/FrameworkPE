@@ -1,7 +1,7 @@
 technique: progressive_hint
 name: "Progressive Hint"
 description: "Progressive Hint Prompting - Gera dicas progressivas para melhorar a classificação"
-acronym: "PPH"
+acronym: "PHP"
 strategy: progressive_hint
 prompt_text: |
   {input_framework}
@@ -10,9 +10,9 @@ prompt_text: |
 
 hint_template: |
   Hint: The previous prediction was {previous_category}.
-  Please reconsider the incident and answer again.
+  Please reconsider the input and answer again.
 
-  Incident:
+  Input:
   {input_framework}
 
   {output_format}
@@ -23,12 +23,14 @@ output_format: |
   Explanation: Unknown
 
   OUTPUT:
-  Category: [NIST code]
+  Category: [category code or label]
   Explanation: [Justification for the chosen category]
+
 params:
   max_hints: 4
   quality_threshold: 0.9
   mode: php
+
 extraction:
   method: json
   unknown_category: UNKNOWN

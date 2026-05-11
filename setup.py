@@ -37,8 +37,8 @@ setup(
         "pandas>=2.1",
         "openpyxl>=3.1",
         "openai>=1.6",
-        "transformers>=4.36",
-        "torch>=2.1",
+        #"transformers>=4.36",
+        #"torch>=2.1",
         "rouge-score>=0.1",
         "huggingface-hub>=0.20",
         "psutil>=5.9",
@@ -52,7 +52,7 @@ setup(
         "filelock>=3.18",
         "python-dotenv",
         "aiohttp",
-        "litellm",
+        "litellm<=1.82.6",
         "pyyaml",
         "typer[all]",   # 🔥 CLI moderno
         "rich"          # 🔥 output bonito

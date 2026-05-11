@@ -87,16 +87,12 @@ class APIModel(BaseModel):
             return getattr(response, "content", "") or ""
 
     def _get_model_identifier(self) -> str:
-        # Fallback generico usando nomenclatura padrao LiteLLM (provider/model)
-        if self.provider not in ("openai", "azure_openai", "cohere", "anthropic"):
-            prefix = f"{self.provider}/"
-        else:
-            prefix = ""
-            
-        if prefix and self.model_name.startswith(prefix):
+        # LiteLLM espera o formato "{provider}/{model}" para todos os provedores.
+        # Evita duplo prefixo caso o nome já esteja no formato correto.
+        prefix = f"{self.provider}/"
+        if self.model_name.startswith(prefix):
             return self.model_name
-            
-        return f"{prefix}{self.model_name}" if prefix else self.model_name
+        return f"{prefix}{self.model_name}"
 
     @staticmethod
     def _resolve_secret(value: Any) -> Any:

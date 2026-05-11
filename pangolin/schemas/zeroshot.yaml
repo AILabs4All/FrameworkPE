@@ -8,58 +8,31 @@ prompt_text: |
 
   {categories_info}
 
-  INCIDENT TO CLASSIFY:
+  INPUT:
   {input_framework}
 
   {output_format}
 
 system_prompt: |
-  You are an expert in security incident classification. Provide a concise category and explanation.
+  You are an expert analyst. Classify the input into the most appropriate category and justify your answer.
 
 output_format: |
   REQUIRED OUTPUT FORMAT:
-  Category: [CAT1-CAT12 or Unknown]
+  Category: [category code or label]
   Explanation: [Detailed justification]
+
 params:
   mode: zeroshot
   temperature_override: 0.0
-categories:
-  - code: CAT1
-    name: Account Compromise
-    description: unauthorized access to user or administrator accounts
-  - code: CAT2
-    name: Malware
-    description: infection by malicious code
-  - code: CAT3
-    name: Denial of Service Attack
-    description: making systems unavailable
-  - code: CAT4
-    name: Data Leak
-    description: unauthorized disclosure of sensitive data
-  - code: CAT5
-    name: Vulnerability Exploitation
-    description: using technical flaws for attacks
-  - code: CAT6
-    name: Insider Abuse
-    description: malicious actions by internal users
-  - code: CAT7
-    name: Social Engineering
-    description: deception to gain access or data
-  - code: CAT8
-    name: Physical Incident
-    description: impact due to unauthorized physical access
-  - code: CAT9
-    name: Unauthorized Modification
-    description: improper changes to systems or data
-  - code: CAT10
-    name: Misuse of Resources
-    description: unauthorized use for other purposes
-  - code: CAT11
-    name: Third-Party Issues
-    description: security failures by suppliers
-  - code: CAT12
-    name: Intrusion Attempt
-    description: unconfirmed attacks or reconnaissance
+
+# categories: define your domain-specific categories here.
+# Example:
+#   categories:
+#     - code: C1
+#       name: Category Name
+#       description: Short description
+categories: []
+
 extraction:
   method: json
   unknown_category: UNKNOWN

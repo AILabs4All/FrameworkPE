@@ -1,4 +1,3 @@
-import json
 from dataclasses import dataclass, field, asdict
 from typing import Any, Dict, List, Optional
 
@@ -19,6 +18,7 @@ class PromptConfig:
     output_format: Optional[str] = None
     categories: List[Dict[str, Any]] = field(default_factory=list)
     examples: List[Dict[str, Any]] = field(default_factory=list)
+    context_hints: List[Dict[str, Any]] = field(default_factory=list)
     parameters: Dict[str, Any] = field(default_factory=dict)
     metadata: Dict[str, Any] = field(default_factory=dict)
     templates: Dict[str, str] = field(default_factory=dict)
@@ -42,6 +42,7 @@ class PromptConfig:
             output_format=data.get("output_format"),
             categories=data.get("categories", []),
             examples=data.get("examples", []),
+            context_hints=data.get("context_hints", []),
             parameters=data.get("params", data.get("parameters", {})),
             metadata=data.get("metadata", {}),
             templates=data.get("templates", {}),
@@ -86,6 +87,7 @@ class HtpConfig(PromptConfig):
             output_format=base.output_format,
             categories=base.categories,
             examples=base.examples,
+            context_hints=base.context_hints,
             parameters=base.parameters,
             metadata=base.metadata,
             templates=base.templates,
@@ -121,6 +123,7 @@ class ProgressiveHintConfig(PromptConfig):
             output_format=base.output_format,
             categories=base.categories,
             examples=base.examples,
+            context_hints=base.context_hints,
             parameters=base.parameters,
             metadata=base.metadata,
             templates=base.templates,
@@ -151,6 +154,7 @@ class SelfHintConfig(PromptConfig):
             output_format=base.output_format,
             categories=base.categories,
             examples=base.examples,
+            context_hints=base.context_hints,
             parameters=base.parameters,
             metadata=base.metadata,
             templates=base.templates,
@@ -183,6 +187,7 @@ class ProgressiveRectificationConfig(PromptConfig):
             output_format=base.output_format,
             categories=base.categories,
             examples=base.examples,
+            context_hints=base.context_hints,
             parameters=base.parameters,
             metadata=base.metadata,
             templates=base.templates,
@@ -196,6 +201,7 @@ class ProgressiveRectificationConfig(PromptConfig):
 
 @dataclass
 class FreePromptConfig(PromptConfig):
+    system_prompt: str = ""
     use_examples: bool = True
     use_structured_output: bool = True
     use_context_hints: bool = False
@@ -204,6 +210,7 @@ class FreePromptConfig(PromptConfig):
     @classmethod
     def from_dict(cls, data: Dict[str, Any]):
         base = PromptConfig.from_dict(data)
+        params = data.get("params", {})
         return cls(
             technique=base.technique,
             name=base.name,
@@ -216,13 +223,15 @@ class FreePromptConfig(PromptConfig):
             output_format=base.output_format,
             categories=base.categories,
             examples=base.examples,
+            context_hints=base.context_hints,
             parameters=base.parameters,
             metadata=base.metadata,
             templates=base.templates,
-            use_examples=bool(data.get("params", {}).get("use_examples", data.get("use_examples", True))),
-            use_structured_output=bool(data.get("params", {}).get("use_structured_output", data.get("use_structured_output", True))),
-            use_context_hints=bool(data.get("params", {}).get("use_context_hints", data.get("use_context_hints", False))),
-            temperature_override=data.get("params", {}).get("temperature_override", data.get("temperature_override"))
+            system_prompt=data.get("system_prompt", data.get("templates", {}).get("system_prompt", "")),
+            use_examples=bool(params.get("use_examples", data.get("use_examples", True))),
+            use_structured_output=bool(params.get("use_structured_output", data.get("use_structured_output", True))),
+            use_context_hints=bool(params.get("use_context_hints", data.get("use_context_hints", False))),
+            temperature_override=params.get("temperature_override", data.get("temperature_override"))
         )
 
 
@@ -245,6 +254,7 @@ class ZeroShotConfig(PromptConfig):
             output_format=base.output_format,
             categories=base.categories,
             examples=base.examples,
+            context_hints=base.context_hints,
             parameters=base.parameters,
             metadata=base.metadata,
             templates=base.templates,

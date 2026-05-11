@@ -1,6 +1,6 @@
 """Module for handling the init command to create new Pangolin projects."""
 
-from core.pangolin_project import PangolinProject
+from core.project.pangolin_project import PangolinProject
 
 def cmd_init(args):
     """Comando: init pg --name <name>"""
@@ -19,11 +19,13 @@ def cmd_init(args):
         print(f"\nProjeto '{args.name}' criado com sucesso!")
         print(f"\nEstrutura criada:")
         print(f"   {args.name}/")
-        print(f"   ├── data/          # Coloque seus dados aqui")
-        print(f"   ├── prompts/       # Prompts customizados")
-        print(f"   ├── model/         # Modelos")
-        print(f"   ├── config.yaml    # Configurações")
-        print(f"   └── README.md      # Documentação")
+        print(f"   ├── data/          # Base de dados (coloque seus arquivos CSV/JSON/XLSX aqui)")
+        print(f"   ├── schema/        # Definições de técnicas de prompt em YAML")
+        print(f"   ├── model/         # Diretorio do modelo")
+        print(f"   ├── logs/          # Logs de execucao")
+        print(f"   ├── output/        # Resultados das execucoes")
+        print(f"   ├── config.yaml    # Configuracoes do projeto")
+        print(f"   └── README.md      # Este arquivo")
         
         print(f"\nPróximos passos:")
         print(f"   1. cd {args.name}")

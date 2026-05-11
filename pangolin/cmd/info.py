@@ -1,4 +1,4 @@
-from core.pangolin_project import PangolinProject
+from core.project.pangolin_project import PangolinProject
 
 def cmd_info(args):
     """Comando: info pg"""
@@ -17,7 +17,7 @@ def cmd_info(args):
         print(f"\nDiretorios:")
         print(f"Projeto: {info['path']}")
         print(f"Data: {info['directories']['data']} ({info['file_counts']['data']} arquivos)")
-        print(f"Prompts: {info['directories']['prompts']} ({info['file_counts']['prompts']} arquivos)")
+        print(f"Schema: {info['directories']['schema']}")
         print(f"Model: {info['directories']['model']} ({info['file_counts']['model']} arquivos)")
         print(f"Logs: {info['directories']['logs']} ({info['file_counts']['logs']} arquivos)")
         print(f"Output: {info['directories']['output']} ({info['file_counts']['output']} arquivos)")
@@ -26,7 +26,9 @@ def cmd_info(args):
         print(f"\nConfiguracao:")
         print(f"Descricao: {config.get('project', {}).get('description', 'N/A')}")
         print(f"Versao: {config.get('project', {}).get('version', 'N/A')}")
-        print(f"Modelo: {config.get('model', {}).get('name', 'N/A')}")
+        models = config.get('models', [])
+        model_names = ', '.join(m.get('name', 'N/A') for m in models) if models else 'N/A'
+        print(f"Modelos: {model_names}")
         print(f"Tecnica: {config.get('prompt', {}).get('technique', 'N/A')}")
         
         return 0

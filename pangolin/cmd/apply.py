@@ -1,5 +1,4 @@
-from core.pangolin_project import PangolinProject
-from pathlib import Path
+from core.project.pangolin_project import PangolinProject
 
 
 def cmd_apply(args):
@@ -82,10 +81,8 @@ def cmd_apply(args):
                 
             if technique:
                 plugin_name = technique_to_plugin.get(technique)
-                if plugin_name and plugin_manager.get_prompt_plugin(plugin_name):
-                    print(f"   - Tecnica '{technique}': OK (plugin: {plugin_name})")
-                elif plugin_name:
-                    print(f"   - Tecnica '{technique}': Plugin '{plugin_name}' não encontrado")
+                if plugin_name:
+                    print(f"   - Tecnica '{technique}': OK (schema: {plugin_name})")
                 else:
                     print(f"   - Tecnica '{technique}': Técnica não conhecida pelo framework")
         
@@ -136,15 +133,5 @@ def cmd_apply(args):
         print(f"Erro ao aplicar configuracoes: {e}")
         import traceback
         if hasattr(args, 'debug') and args.debug:
-            traceback.print_exc()
-        return 1
-        
-    except FileNotFoundError as e:
-        print(f" Erro: {e}")
-        return 1
-    except Exception as e:
-        print(f" Erro ao aplicar configurações: {e}")
-        import traceback
-        if args.debug:
             traceback.print_exc()
         return 1

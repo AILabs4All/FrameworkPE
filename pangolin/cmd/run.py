@@ -1,7 +1,7 @@
-from core.pangolin_project import PangolinProject
-from core.framework import SecurityIncidentFramework
-from pathlib import Path
-from utils.logger import setup_logger
+from core.project.pangolin_project import PangolinProject
+from core.framework import PangolinFramework
+from core.observability.logger import setup_logger
+from dotenv import load_dotenv
 
 
 def run_command(
@@ -32,6 +32,8 @@ def run_command(
     project = verify_project_directory()
     if project is None:
         return 1
+
+    load_dotenv(project.env_path, override=False)
 
     logger = setup_logger("pg-run", log_dir=str(project.logs_dir))
     logger.info(f"Executando projeto '{project.project_name}'")
@@ -78,7 +80,7 @@ def run_command(
             logger.info("Tecnica nao especificada")
             return 1
 
-        framework = SecurityIncidentFramework(project=project)
+        framework = PangolinFramework(project=project)
 
         technique_params = {}
         if max_iterations:

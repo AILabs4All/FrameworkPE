@@ -8,8 +8,8 @@ from typing import Any, Dict, Optional
 
 import tiktoken
 
-from utils.logger import setup_logger
-from utils.metrics import TokenMetrics
+from core.observability.logger import setup_logger
+from core.observability.metrics import TokenMetrics
 
 
 class BaseModel(ABC):

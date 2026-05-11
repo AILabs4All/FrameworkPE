@@ -6,28 +6,26 @@ from pathlib import Path
 from .plugin_manager import PluginManager
 from plugins.prompts.schema_prompt_plugin import SchemaPromptPlugin
 from plugins.prompts.config import PromptConfigFactory
-from utils.logger import setup_logger
-from utils.file_handlers import load_data_files, save_results, validate_columns
-from utils.metrics import MetricsCollector
+from .observability.logger import setup_logger
+from .io.file_handlers import load_data_files, save_results, validate_columns
+from .observability.metrics import MetricsCollector
 
-class SecurityIncidentFramework:
-    """Framework principal para classificação de incidentes de segurança."""
-    
+class PangolinFramework:
+    """Framework principal para processamento de dados com técnicas de prompt."""
+
     def __init__(self, project=None):
         """Inicializa framework opcionalmente com projeto isolado."""
         self.project = project
-        
-        # Define diretório de logs baseado no projeto
+
         log_dir = str(project.logs_dir) if project else "logs"
-        self.logger = setup_logger("SecurityIncidentFramework", log_dir=log_dir)
-        
+        self.logger = setup_logger("PangolinFramework", log_dir=log_dir)
+
         self.plugin_manager = PluginManager()
-        
-        # Inicializa MetricsCollector com diretório do projeto
+
         metrics_dir = str(project.metrics_dir) if project else "logs"
         self.metrics_collector = MetricsCollector(log_dir=metrics_dir)
-        
-        self.logger.info("Framework de Classificação de Incidentes de Segurança iniciado")
+
+        self.logger.info("PangolinFramework iniciado")
         
     def process_incidents(self, input_dir: str, columns: List[str], model_config: Dict[str, Any], 
                          prompt_techniques: List[str], output_format: str = "csv", **kwargs) -> Dict[str, Any]:
@@ -187,64 +185,13 @@ class SecurityIncidentFramework:
         return results
     
     def _build_prompt(self, row: pd.Series, columns: List[str]) -> str:
-        """Constrói prompt base para classificação."""
-        nist_enabled = True
-        
-        # Prompt base
-        prompt = """
-        You are a security expert.
-        Categorize the following incident description into a Category and an Explanation.
-
-        Description:
-            ```"""
-        
-        # Adiciona informações do incidente
-        for coluna in columns:
-            if coluna in row and pd.notnull(row[coluna]):
-                prompt += f" [{coluna}]: [{row[coluna]}]"
-        
-        prompt += "\n            ```"
-        
-        # Adiciona categorias NIST se habilitadas
-        if nist_enabled:
-            prompt += self._get_nist_prompt_section()
-        
-        return prompt
-    
-    def _get_nist_prompt_section(self) -> str:
-        """Retorna seção do prompt com categorias NIST."""
-        return """
-        
-        NIST Categories Available for Classification:
-        - CAT1: Account Compromise – unauthorized access to user or administrator accounts.
-            Examples: credential phishing, SSH brute force, OAuth token theft.
-        - CAT2: Malware – infection by malicious code.
-            Examples: ransomware, Trojan horse, macro virus.
-        - CAT3: Denial of Service Attack – making systems unavailable.
-            Examples: volumetric DoS or DDoS (UDP flood, SYN flood, HTTP, HTTPS), attack on publicly available APIs or websites, botnet Mirai attacking an institution's server.
-        - CAT4: Data Leak – unauthorized disclosure of sensitive data.
-            Examples: database theft, leaked credentials.
-        - CAT5: Vulnerability Exploitation – using technical flaws for attacks.
-            Examples: exploitation of critical CVE, remote code execution (RCE), SQL injection in web applications.
-        - CAT6: Insider Abuse – malicious actions by internal users.
-            Examples: copying confidential data, sabotage.
-        - CAT7: Social Engineering – deception to gain access or data.
-            Examples: phishing, vishing, CEO fraud.
-        - CAT8: Physical Incident – impact due to unauthorized physical access.
-            Examples: laptop theft, data center break-in.
-        - CAT9: Unauthorized Modification – improper changes to systems or data.
-            Examples: defacement, record manipulation.
-        - CAT10: Misuse of Resources – unauthorized use for other purposes.
-            Examples: cryptocurrency mining, malware distribution.
-        - CAT11: Third-Party Issues – security failures by suppliers.
-            Examples: SaaS breach, supply chain attack.
-        - CAT12: Intrusion Attempt – unconfirmed attacks.
-            Examples: network scans, brute force, blocked exploits.
-
-        Your task:
-        - Classify the incident below using the most appropriate category code (CAT1 to CAT12).
-        - Justify based on the explanation of the selected category.
-        """
+        """Constrói texto de entrada combinando as colunas configuradas."""
+        parts = [
+            f"[{col}]: [{row[col]}]"
+            for col in columns
+            if col in row and pd.notnull(row[col])
+        ]
+        return " ".join(parts)
     
     def _build_incident_info(self, row: pd.Series, columns: List[str]) -> str:
         """Constrói string com informações do incidente."""
@@ -258,7 +205,6 @@ class SecurityIncidentFramework:
     def get_framework_info(self) -> Dict[str, Any]:
         """Retorna informações sobre o framework."""
         return {
-            "framework": {"name": "Security Incident Framework", "version": "2.0.0"},
+            "framework": {"name": "Pangolin Framework", "version": "2.0.0"},
             "plugin_info": self.plugin_manager.get_plugin_info(),
-            "nist_categories_enabled": True
         }

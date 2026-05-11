@@ -1,4 +1,4 @@
-from core.pangolin_project import PangolinProject
+from core.project.pangolin_project import PangolinProject
 
 def cmd_list(args):
     """Comando: list pg"""

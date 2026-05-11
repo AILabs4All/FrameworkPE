@@ -12,7 +12,7 @@ prompt_text: |
 
 plan_instructions: |
   Let's first understand the problem and devise a plan to solve it step by step.
-  Then execute the plan and classify the incident accordingly.
+  Then execute the plan and classify the input accordingly.
 
 output_format: |
   If classification is not possible, return:
@@ -20,12 +20,14 @@ output_format: |
   Explanation: Unknown
 
   OUTPUT:
-  Category: [NIST code]
+  Category: [category code or label]
   Explanation: [Justification for the chosen category]
+
 params:
   max_iter: 4
   quality_threshold: 0.9
   mode: shp
+
 extraction:
   method: json
   unknown_category: UNKNOWN

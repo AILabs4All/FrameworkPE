@@ -3,9 +3,12 @@ from .config.prompt_config import HtpConfig
 from typing import Dict, Any, List, Optional
 import pandas as pd
 
+
 class HypothesisTestingPlugin(BasePromptPlugin):
-    def __init__(self, config: HtpConfig, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    """Testa hipóteses para cada categoria definida no schema."""
+
+    def __init__(self, config: HtpConfig, model_plugin, task_config: Optional[dict] = None):
+        super().__init__(model_plugin, task_config)
         self.config = config
 
     def execute(self,
@@ -13,54 +16,49 @@ class HypothesisTestingPlugin(BasePromptPlugin):
                 data_row: pd.Series,
                 columns: List[str],
                 **kwargs) -> List[Dict[str, Any]]:
-        # Parâmetros: preferência do kwargs, senão do config
-        max_iter = int(kwargs.get("max_iter", self.config.max_iteracao))
-        limite_qualidade = float(kwargs.get("limite_qualidade", self.config.limite_qualidade))
+        max_iter = int(kwargs.get("max_iter", self.config.max_iter))
+        threshold = float(kwargs.get("quality_threshold", self.config.quality_threshold))
         key_words = self.config.key_words
         prompt_template = self.config.prompt_text
+        output_format = self.config.output_format or ""
 
-        incident = self.build_input_text(data_row, columns)
-        # Itera sobre todas as categorias definidas, exceto 'UNKNOWN'
+        incident_text = self.build_input_text(data_row, columns)
+        incident_id = kwargs.get("incident_id")
         categories = [cat for cat in key_words.keys() if cat.upper() != "UNKNOWN"]
 
         results = []
-        i = 0
-        while i < len(categories) and i < max_iter:
-            category = categories[i]
-            keywords = key_words[category]  # já é uma lista
-            keywords_str = ', '.join(keywords)
+        for i, category in enumerate(categories):
+            if i >= max_iter:
+                break
 
-            # Preenche o template com os dados dinâmicos
+            keywords_str = ", ".join(key_words[category])
             prompt_llm = prompt_template.format(
                 input_framework=prompt,
                 category=category,
-                keywords_str=keywords_str
+                keywords_str=keywords_str,
+                output_format=output_format
             )
 
-            incident_id = kwargs.get('incident_id')
-            hipoteses = self.model_plugin.send_prompt(prompt_llm, mode="htp", incident_id=incident_id)
-            incident_info = self.extract_security_incidents(hipoteses)
-            result_cat = incident_info['Category']
+            response = self.model_plugin.send_prompt(prompt_llm, mode="htp", incident_id=incident_id)
+            extracted = self.extract_answer(response)
+            result_cat = extracted.get("category", "UNKNOWN")
 
-            rouge_score = self.calculate_rouge_score(result_cat, category)
-            if rouge_score >= limite_qualidade:
+            score = self.calculate_rouge_score(result_cat, category)
+            if score >= threshold:
                 results.append({
                     "id": incident_id,
-                    "informacoes_das_colunas": incident,
+                    "informacoes_das_colunas": incident_text,
                     "categoria": result_cat,
-                    "explicacao": incident_info['Explanation'],
+                    "explicacao": extracted.get("explanation", ""),
                     "categoria_testada": category,
-                    "rouge": rouge_score,
+                    "rouge": score,
                     "iteracao": i + 1
                 })
                 return results
 
-            i += 1
-
-        # Nenhuma categoria confirmada
         results.append({
             "id": incident_id,
-            "informacoes_das_colunas": incident,
+            "informacoes_das_colunas": incident_text,
             "categoria": "UNKNOWN",
             "explicacao": "Nenhuma categoria foi confirmada através do teste de hipóteses",
             "categoria_testada": "ALL",
@@ -70,7 +68,7 @@ class HypothesisTestingPlugin(BasePromptPlugin):
         return results
 
     def get_name(self) -> str:
-        return self.config.acronimo  # ou self.config.name
+        return self.config.acronym
 
     def get_description(self) -> str:
         return self.config.description
