@@ -87,9 +87,10 @@ class PangolinFramework:
             raise ValueError(f"Erro ao criar instância do modelo: {model_name}")
         
         techniques = prompt_techniques
-        
-        # Processa com cada técnica
+
+        # Processa com cada técnica e salva CSV individual
         all_results = []
+        output_files = []
         for technique in techniques:
             self.logger.info(f"Processando com técnica: {technique}")
 
@@ -105,43 +106,43 @@ class PangolinFramework:
             results = self._process_all_incidents(
                 dataframes, columns, prompt_instance, **kwargs
             )
-            
+
             # Adiciona informação da técnica aos resultados
             for result in results:
                 result['technique_used'] = technique
-            
+
+            # Salva CSV individual por técnica
+            if self.project:
+                output_path = str(self.project.get_results_path(f"resultados_{model_name}_{technique}"))
+            else:
+                output_path = f"resultados_{model_name}_{technique}"
+
+            save_results(results, output_path, "csv")
+            output_files.append(f"{output_path}.csv")
+
             all_results.extend(results)
-        
+
         if not all_results:
             raise ValueError(f"Nenhum resultado foi gerado com as técnicas: {prompt_techniques}")
-        
-        # Define caminho de saída baseado no projeto
-        technique_str = "_".join(techniques) if isinstance(prompt_techniques, list) else prompt_techniques
-        if self.project:
-            output_path = str(self.project.get_results_path(f"resultados_{model_name}_{technique_str}"))
-        else:
-            output_path = f"resultados_{model_name}_{technique_str}"
-        
-        # Salva resultados
-        save_results(all_results, output_path.replace(f'.{output_format}', ''), output_format)
-        
+
         # Coleta métricas finais
         performance_summary = self.metrics_collector.log_performance_summary()
-        
+
         # Salva métricas no projeto se disponível
+        technique_str = "_".join(techniques) if isinstance(prompt_techniques, list) else prompt_techniques
         if self.project:
             metrics_file = self.project.get_metrics_path(f"performance_{model_name}_{technique_str}.json")
             import json
             with open(metrics_file, 'w', encoding='utf-8') as f:
                 json.dump(performance_summary, f, indent=2)
-        
+
         summary = {
             "total_incidents": len(all_results),
             "results": all_results,
             "model_used": model_name,
             "prompt_techniques": prompt_techniques,
             "techniques_used": techniques,
-            "output_file": f"{output_path}.{output_format}",
+            "output_files": output_files,
             "performance": performance_summary
         }
         
