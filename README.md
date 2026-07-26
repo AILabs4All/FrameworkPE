@@ -247,8 +247,8 @@ models:
 
 | Documento | Conteúdo |
 |---|---|
-| [GUIA_ARQUITETURA_PROMPTS.md](GUIA_ARQUITETURA_PROMPTS.md) | Arquitetura interna, componentes, fluxo de execução, como estender o framework |
-| [SCHEMAS_REFERENCIA_RAPIDA.md](SCHEMAS_REFERENCIA_RAPIDA.md) | Referência técnica de todos os schemas de prompt e campos disponíveis |
-| [docs/CONFIG_REFERENCE.md](docs/CONFIG_REFERENCE.md) | Referência completa de todos os campos do `config.yaml` |
-| [docs/DATASETS_GUIDE.md](docs/DATASETS_GUIDE.md) | Guia de formatação e preparação de datasets |
-| [docs/NEW_PROJECT_GUIDE.md](docs/NEW_PROJECT_GUIDE.md) | Guia passo a passo para criar e configurar um novo projeto |
+| [GUIA_ARQUITETURA_PROMPTS.md](docs/GUIA_ARQUITETURA_PROMPTS.md) | Arquitetura interna, componentes, fluxo de execução, como estender o framework |
+| [SCHEMAS_REFERENCIA_RAPIDA.md](docs/SCHEMAS_REFERENCIA_RAPIDA.md) | Referência técnica de todos os schemas de prompt e campos disponíveis |
+| [CONFIG_REFERENCE.md](docs/CONFIG_REFERENCE.md) | Referência completa de todos os campos do `config.yaml` |
+| [DATASETS_GUIDE.md](docs/DATASETS_GUIDE.md) | Guia de formatação e preparação de datasets |
+| [NEW_PROJECT_GUIDE.md](docs/NEW_PROJECT_GUIDE.md) | Guia passo a passo para criar e configurar um novo projeto |
