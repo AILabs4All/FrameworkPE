@@ -8,8 +8,9 @@ from unittest.mock import patch, MagicMock
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "pangolin"))
 
-from pangolin_cli import cmd_init
+from pangolin.cmd.init import cmd_init
 
 
 @pytest.fixture
@@ -41,7 +42,7 @@ class TestCmdInit:
         project_path = tmp_project_dir / "meu_projeto"
         assert project_path.exists()
         assert (project_path / "data").is_dir()
-        assert (project_path / "prompts").is_dir()
+        assert (project_path / "schema").is_dir()
         assert (project_path / "model").is_dir()
         assert (project_path / "config.yaml").exists()
 
