@@ -36,15 +36,12 @@ class ConfigLoader:
             )
             return self._load_default_config()
 
-        try:
-            path = Path(config_path)
-            if path.suffix.lower() in {'.yaml', '.yml'}:
-                return self._load_yaml(config_path)
-            return self._load_json(config_path)
-        except Exception as e:
-            self.logger.error(f"Erro ao carregar configuração de '{config_path}': {e}")
-            self.logger.info("Usando configuração padrão.")
-            return self._load_default_config()
+        # Se o arquivo existe, um erro de parsing NÃO deve cair no default:
+        # a configuração inválida é um erro do usuário e deve ser propagada.
+        path = Path(config_path)
+        if path.suffix.lower() in {'.yaml', '.yml'}:
+            return self._load_yaml(config_path)
+        return self._load_json(config_path)
 
     def _load_json(self, config_path: str) -> Dict[str, Any]:
         """Carrega configuração de arquivo JSON."""

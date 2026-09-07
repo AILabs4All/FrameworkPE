@@ -56,9 +56,13 @@ def run_command(
                 if m.get('name') == model:
                     selected_models.append(m)
                     break
-            # If not found, create a minimal config with this name
+            # If not found, fail with the list of available models (no silent default)
             if not selected_models:
-                selected_models.append({"name": model, "provider": "ollama"})
+                available = [m.get('name', '?') for m in models_config]
+                raise ValueError(
+                    f"Modelo '{model}' não encontrado no config.yaml."
+                    f" Modelos disponíveis: {', '.join(available) or '(nenhum modelo configurado)'}"
+                )
         else:
             selected_models = models_config
 

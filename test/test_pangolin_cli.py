@@ -145,3 +145,80 @@ class TestPluginResolution:
         )
         esperado = sorted(p.stem for p in schemas_dir.glob("*.yaml"))
         assert PluginManager().get_available_techniques() == esperado
+
+
+class TestRunNoSilentFallback:
+
+    def _criar_projeto(self, tmp_path, models=None):
+        from core.project.pangolin_project import PangolinProject
+        from core.project import scaffold
+        models = models or [
+            {"name": "meu_modelo", "provider": "ollama", "temperature": 0.2,
+             "max_tokens": 2048}
+        ]
+        cfg = {
+            "project": {"name": "proj", "description": "x", "created_at": "2026-01-01",
+                        "version": "1.0.0"},
+            "data": {"input_columns": ["description"], "required_columns": ["id", "target"]},
+            "models": models,
+            "prompt": {"technique": ["zeroshot"], "schema_dir": "schema"},
+            "output": {"format": "json", "save_metrics": True, "save_logs": True},
+        }
+        p = PangolinProject("proj", base_dir=str(tmp_path))
+        scaffold.create_project_structure(p)
+        scaffold.write_config(p, cfg)
+        (p.data_dir / "dados.csv").write_text(
+            "id,target,description\n1,cat,item de teste\n", encoding="utf-8"
+        )
+        return p
+
+    def test_run_model_inexistente_falha_com_lista(self, tmp_path, monkeypatch, capsys):
+        from pangolin.cmd.run import run_command
+        p = self._criar_projeto(tmp_path)
+        monkeypatch.chdir(p.project_path)
+        result = run_command(model="nao_existe")
+        assert result == 1
+        out = capsys.readouterr().out
+        assert "não encontrado" in out
+        assert "meu_modelo" in out
+        assert "ollama" not in out
+
+    def test_loader_yaml_invalido_levanta_erro(self, tmp_path):
+        import yaml
+        from core.config.loader import ConfigLoader
+        bad = tmp_path / "config.yaml"
+        bad.write_text("models: [arquivo quebrado\n", encoding="utf-8")
+        with pytest.raises(yaml.YAMLError):
+            ConfigLoader().load(str(bad))
+
+    def test_loader_arquivo_ausente_usa_default(self, tmp_path):
+        from core.config.loader import ConfigLoader
+        cfg = ConfigLoader().load(str(tmp_path / "config.yaml"))
+        assert "framework" in cfg
+
+
+class TestFrameworkFailFast:
+
+    def test_provider_desconhecido_nao_vira_api_model(self, tmp_path, monkeypatch):
+        from core.framework import PangolinFramework
+        from unittest.mock import patch, MagicMock
+        project = MagicMock()
+        project.logs_dir = tmp_path
+        project.metrics_dir = tmp_path
+        project.load_prompt_schema = MagicMock()
+
+        import pandas as pd
+        df = pd.DataFrame({"id": [1], "target": ["cat"], "description": ["x"]})
+
+        framework = PangolinFramework(project=project)
+        with patch("core.framework.load_data_files", return_value=[df]):
+            with patch("core.framework.validate_columns", return_value=True):
+                with pytest.raises(ValueError) as exc:
+                    framework.process_incidents(
+                        input_dir=str(tmp_path),
+                        columns=["description"],
+                        model_config={"name": "m", "provider": "hugginface"},
+                        prompt_techniques=["zeroshot"],
+                    )
+        assert "não reconhecido" in str(exc.value)
+        assert "Você quis dizer" in str(exc.value)
