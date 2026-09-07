@@ -34,56 +34,39 @@ def cmd_apply(args):
         
         plugin_manager = PluginManager()
         
-        # Mapeamento do provider em plugin para validação
-        provider_to_plugin = {
-            'ollama': 'LocalModel',
-            'local': 'LocalModel',
-            'huggingface': 'HuggingfaceModel',
-            'openai': 'APIModel',
-            'anthropic': 'APIModel',
-            'gemini': 'APIModel',
-            'google': 'APIModel',
-            'cohere': 'APIModel',
-            'azure': 'APIModel',
-            'bedrock': 'APIModel',
-            'vertex': 'APIModel',
-            'palm': 'APIModel'
-        }
+        validation_errors = []
         
         models = config.get('models', [])
         if models:
             for model_config in models:
                 model_name = model_config.get('name')
-                provider = model_config.get('provider', '').lower()
-                plugin_name = provider_to_plugin.get(provider, 'APIModel')
-                
-                if plugin_manager.get_model_plugin(plugin_name):
-                    print(f"   - Modelo '{model_name}': OK (plugin: {plugin_name})")
-                else:
-                    print(f"   - Modelo '{model_name}': Plugin '{plugin_name}' não encontrado")
+                provider = model_config.get('provider', '')
+                try:
+                    plugin_class = plugin_manager.resolve_model(provider)
+                except ValueError as e:
+                    validation_errors.append(f"Modelo '{model_name}': {e}")
+                    continue
+                print(f"   - Modelo '{model_name}': OK (plugin: {plugin_class.__name__})")
         
         # Valida técnica de prompt
         technique = config.get('prompt', {}).get('technique')
         if technique:
             if isinstance(technique, list):
                 technique = technique[0] if technique else None
-                
-            technique_to_plugin = {
-                'progressive_hint': 'ProgressiveHintPlugin',
-                'self_hint': 'SelfHintPlugin',
-                'progressive_rectification': 'ProgressiveRectificationPlugin',
-                'hypothesis_testing': 'HypothesisTestingPlugin',
-                'free_prompt': 'FreePromptPlugin',
-                'zeroshot': 'ZeroShotPlugin',
-                'zeroshot_b': 'ZeroShotPlugin'
-            }
-                
+
             if technique:
-                plugin_name = technique_to_plugin.get(technique)
-                if plugin_name:
-                    print(f"   - Tecnica '{technique}': OK (schema: {plugin_name})")
+                try:
+                    schema_path = plugin_manager.resolve_schema_file(technique)
+                except ValueError as e:
+                    validation_errors.append(f"Técnica '{technique}': {e}")
                 else:
-                    print(f"   - Tecnica '{technique}': Técnica não conhecida pelo framework")
+                    print(f"   - Tecnica '{technique}': OK (schema: {schema_path.name})")
+        
+        if validation_errors:
+            print("\nErros de validacao:")
+            for error in validation_errors:
+                print(f"   - {error}")
+            return 1
         
         # Aplica configurações
         result = project.apply()

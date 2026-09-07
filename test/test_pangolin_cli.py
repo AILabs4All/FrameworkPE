@@ -91,3 +91,57 @@ class TestPluginNamingHuggingface:
         from core.plugin_manager import PluginManager
         pm = PluginManager()
         assert "HuggingfaceModel" in pm.list_available_models()
+
+
+class TestPluginResolution:
+
+    def test_resolve_model_huggingface(self):
+        from core.plugin_manager import PluginManager
+        pm = PluginManager()
+        cls = pm.resolve_model("huggingface")
+        assert cls.__name__ == "HuggingfaceModel"
+
+    def test_resolve_model_ollama(self):
+        from core.plugin_manager import PluginManager
+        pm = PluginManager()
+        assert pm.resolve_model("ollama").__name__ == "LocalModel"
+
+    def test_resolve_model_upper_case_ignorado(self):
+        from core.plugin_manager import PluginManager
+        pm = PluginManager()
+        assert pm.resolve_model("OPENAI").__name__ == "APIModel"
+
+    def test_resolve_model_desconhecido_sugere_correcao(self):
+        from core.plugin_manager import PluginManager
+        pm = PluginManager()
+        with pytest.raises(ValueError) as exc:
+            pm.resolve_model("hugginface")
+        assert "não reconhecido" in str(exc.value)
+        assert "Você quis dizer 'huggingface'" in str(exc.value)
+
+    def test_resolve_schema_file_existente(self):
+        from core.plugin_manager import PluginManager
+        pm = PluginManager()
+        path = pm.resolve_schema_file("zeroshot")
+        assert path.exists()
+        assert path.name == "zeroshot.yaml"
+
+    def test_resolve_schema_file_desconhecido_sugere_correcao(self):
+        from core.plugin_manager import PluginManager
+        pm = PluginManager()
+        with pytest.raises(ValueError) as exc:
+            pm.resolve_schema_file("zero_shot")
+        assert "Você quis dizer 'zeroshot'" in str(exc.value)
+
+    def test_mapas_provider_consistentes(self):
+        from core.plugin_manager import PROVIDER_TO_MODEL, MODEL_MODULE_FILES
+        assert set(PROVIDER_TO_MODEL) == set(MODEL_MODULE_FILES)
+
+    def test_tecnicas_disponiveis_igual_aos_schemas(self):
+        from core.plugin_manager import PluginManager
+        schemas_dir = (
+            Path(__file__).resolve().parent.parent
+            / "pangolin" / "schemas"
+        )
+        esperado = sorted(p.stem for p in schemas_dir.glob("*.yaml"))
+        assert PluginManager().get_available_techniques() == esperado

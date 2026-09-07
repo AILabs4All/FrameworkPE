@@ -11,6 +11,7 @@ from cmd.run import cmd_run
 from cmd.destroy import cmd_destroy
 from cmd.list import cmd_list
 from cmd.info import cmd_info
+from core.plugin_manager import available_techniques
 
 DESCRIPTION = """Pangolin
                 - Gerenciador de projetos de teste e comparacao de prompts
@@ -40,14 +41,7 @@ EPILOG = """Exemplos:
                 pg destroy --name meu_projeto
     """
 
-PROMPT_ENGINEERING_TECHNIQUES = [
-        "progressive_hint",
-        "progressive_rectification",
-        "self_hint",
-        "hypothesis_testing",
-        "free_prompt",
-        "zeroshot"
-]
+PROMPT_ENGINEERING_TECHNIQUES = available_techniques()
 
 OUTPUT_FORMATS = [
         "csv",
@@ -176,3 +170,5 @@ def main():
 
 if __name__ == '__main__':
     sys.exit(main())
+
+

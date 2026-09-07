@@ -1,4 +1,7 @@
-from typing import Dict, Any, Optional, Type
+from typing import Dict, Any, Optional, Type, List
+from pathlib import Path
+import difflib
+
 from .observability.logger import setup_logger
 
 # Importa os plugins de modelo
@@ -13,6 +16,57 @@ except ImportError:
 
 # Nota: Plugins de prompt agora são gerenciados via schemas YAML
 # e execução genérica através do SchemaPromptPlugin
+
+# Fonte única de verdade para resolução de providers e técnicas.
+# Não manter cópias divergentes deste mapa em outros módulos.
+PROVIDER_TO_MODEL = {
+    'ollama': 'LocalModel',
+    'local': 'LocalModel',
+    'huggingface': 'HuggingfaceModel',
+    'openai': 'APIModel',
+    'anthropic': 'APIModel',
+    'gemini': 'APIModel',
+    'google': 'APIModel',
+    'cohere': 'APIModel',
+    'azure': 'APIModel',
+    'bedrock': 'APIModel',
+    'vertex': 'APIModel',
+    'palm': 'APIModel',
+}
+
+# Arquivo de plugin copiado para o diretório model/ do projeto (vendorização).
+MODEL_MODULE_FILES = {
+    'ollama': 'local_model.py',
+    'local': 'local_model.py',
+    'huggingface': 'huggingface_model.py',
+    'openai': 'api_model.py',
+    'anthropic': 'api_model.py',
+    'gemini': 'api_model.py',
+    'google': 'api_model.py',
+    'cohere': 'api_model.py',
+    'azure': 'api_model.py',
+    'bedrock': 'api_model.py',
+    'vertex': 'api_model.py',
+    'palm': 'api_model.py',
+}
+
+_SCHEMAS_DIR = Path(__file__).resolve().parent.parent / "schemas"
+
+
+def _suggestion(term: str, choices) -> str:
+    """Retorna uma sugestão de correção, se houver, para um termo desconhecido."""
+    matches = difflib.get_close_matches(term, choices, n=1)
+    if matches:
+        return f" Você quis dizer '{matches[0]}'?"
+    return ""
+
+
+def available_techniques() -> List[str]:
+    """Retorna as técnicas conhecidas (schemas do diretório de schemas)."""
+    if not _SCHEMAS_DIR.exists():
+        return []
+    return sorted(p.stem for p in _SCHEMAS_DIR.glob("*.yaml"))
+
 
 class PluginManager:
     """Gerenciador de plugins do framework."""
@@ -45,6 +99,68 @@ class PluginManager:
         """Obtém classe de plugin de modelo pelo nome."""
         return self.model_plugins.get(name)
     
+    def resolve_model(self, provider: str) -> Type:
+        """
+        Resolve a classe de plugin de modelo a partir do provider.
+
+        Raises:
+            ValueError: Se o provider for desconhecido (com sugestão de correção).
+        """
+        provider = (provider or '').strip().lower()
+        plugin_name = PROVIDER_TO_MODEL.get(provider)
+        if plugin_name is None:
+            raise ValueError(
+                f"Provider '{provider}' não reconhecido."
+                f"{_suggestion(provider, PROVIDER_TO_MODEL.keys())}"
+                f" Providers disponíveis: {', '.join(sorted(PROVIDER_TO_MODEL))}"
+            )
+
+        plugin_class = self.get_model_plugin(plugin_name)
+        if plugin_class is None:
+            raise ValueError(
+                f"Plugin de modelo '{plugin_name}' (provider '{provider}') "
+                "não está registrado"
+            )
+        return plugin_class
+
+    def resolve_model_plugin_file(self, provider: str) -> str:
+        """
+        Resolve o arquivo de plugin copiado para o diretório model/ do projeto.
+
+        Raises:
+            ValueError: Se o provider for desconhecido.
+        """
+        provider = (provider or '').strip().lower()
+        plugin_file = MODEL_MODULE_FILES.get(provider)
+        if plugin_file is None:
+            raise ValueError(
+                f"Provider '{provider}' não reconhecido."
+                f"{_suggestion(provider, MODEL_MODULE_FILES.keys())}"
+            )
+        return plugin_file
+
+    def resolve_schema_file(self, technique: str) -> Path:
+        """
+        Resolve o caminho do schema YAML de uma técnica.
+
+        Raises:
+            ValueError: Se a técnica for desconhecida (com sugestão de correção).
+        """
+        technique = (technique or '').strip().lower()
+        schema_file = _SCHEMAS_DIR / f"{technique}.yaml"
+        if not schema_file.exists():
+            techniques = available_techniques()
+            raise ValueError(
+                f"Técnica '{technique}' não reconhecida."
+                f"{_suggestion(technique, techniques)}"
+                f" Técnicas disponíveis: {', '.join(techniques)}"
+            )
+        return schema_file
+
+    def get_available_techniques(self) -> List[str]:
+        """Retorna as técnicas conhecidas pelo framework."""
+        return available_techniques()
+
     def create_model_instance(self, plugin_name: str, config: Dict[str, Any]) -> Optional[Any]:
         """Cria instância de plugin de modelo."""
         plugin_class = self.get_model_plugin(plugin_name)

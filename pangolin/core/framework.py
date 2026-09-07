@@ -61,23 +61,8 @@ class PangolinFramework:
             raise
         
         # Configura modelo
-        provider_map = {
-            'ollama': 'LocalModel',
-            'local': 'LocalModel',
-            'huggingface': 'HuggingfaceModel',
-            'openai': 'APIModel',
-            'anthropic': 'APIModel',
-            'gemini': 'APIModel',
-            'google': 'APIModel',
-            'cohere': 'APIModel',
-            'azure': 'APIModel',
-            'bedrock': 'APIModel',
-            'vertex': 'APIModel',
-            'palm': 'APIModel'
-        }
-        
-        provider = model_config.get('provider', '').lower()
-        plugin_name = provider_map.get(provider, 'APIModel')
+        provider = model_config.get('provider', '')
+        plugin_name = self.plugin_manager.resolve_model(provider).__name__
         
         model_instance = self.plugin_manager.create_model_instance(
             plugin_name, model_config

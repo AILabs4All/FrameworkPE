@@ -12,21 +12,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
 
-
-_PROVIDER_TO_PLUGIN_FILE = {
-    'ollama': 'local_model.py',
-    'local': 'local_model.py',
-    'huggingface': 'huggingface_model.py',
-    'openai': 'api_model.py',
-    'anthropic': 'api_model.py',
-    'gemini': 'api_model.py',
-    'google': 'api_model.py',
-    'cohere': 'api_model.py',
-    'azure': 'api_model.py',
-    'bedrock': 'api_model.py',
-    'vertex': 'api_model.py',
-    'palm': 'api_model.py',
-}
+from ..plugin_manager import MODEL_MODULE_FILES, PluginManager
 
 
 def get_default_config(project_name: str) -> Dict[str, Any]:
@@ -124,14 +110,16 @@ def import_model_plugins(project, config: Dict[str, Any]) -> List[str]:
     """
     imported: set = set()
     framework_plugins = Path(__file__).resolve().parent.parent.parent / "plugins" / "models"
+    plugin_manager = PluginManager()
 
     for model in config.get('models', []):
         provider = model.get('provider', 'ollama').lower()
-        plugin_file = _PROVIDER_TO_PLUGIN_FILE.get(provider, 'api_model.py')
+        plugin_manager.resolve_model(provider)
+        plugin_file = MODEL_MODULE_FILES[provider]
         source_file = framework_plugins / plugin_file
 
         if not source_file.exists():
-            project.logger.warning(f"Arquivo de plugin não encontrado: {source_file}")
+            project.logger.warning("Arquivo de plugin não encontrado: %s", source_file)
             continue
 
         dest_file = project.model_dir / plugin_file
@@ -168,14 +156,13 @@ def import_prompt_plugins(project, config: Dict[str, Any]) -> List[str]:
     if not all_techniques:
         return imported
 
-    framework_schemas = Path(__file__).resolve().parent.parent.parent / "schemas"
-    if not framework_schemas.exists():
-        return imported
+    plugin_manager = PluginManager()
 
     for technique in all_techniques:
-        schema_file = framework_schemas / f"{technique}.yaml"
-        if not schema_file.exists():
-            project.logger.warning("Schema não encontrado no framework: %s.yaml", technique)
+        try:
+            schema_file = plugin_manager.resolve_schema_file(technique)
+        except ValueError as e:
+            project.logger.error("Schema não encontrado no framework: %s", e)
             continue
         dest_file = project.schema_dir / schema_file.name
         if not dest_file.exists():
