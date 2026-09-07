@@ -48,7 +48,9 @@ class PangolinFramework:
         
         # Carrega dados
         try:
-            dataframes = load_data_files(input_dir)
+            project_config = self.project.load_config() if self.project else {}
+            required_columns = project_config.get('data', {}).get('required_columns', ['id', 'target'])
+            dataframes = load_data_files(input_dir, required_columns=required_columns)
             if not dataframes:
                 raise ValueError("Nenhum arquivo de dados encontrado")
                 

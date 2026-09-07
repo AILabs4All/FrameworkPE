@@ -290,3 +290,28 @@ class TestDestroySecurity:
         monkeypatch.chdir(p.project_path)
         p.destroy()
         assert not p.project_path.exists()
+
+
+class TestRequiredColumns:
+
+    def test_load_data_files_usa_required_columns_personalizadas(self, tmp_path):
+        from core.io.file_handlers import load_data_files
+        arquivo = tmp_path / "dados.csv"
+        arquivo.write_text("id,target,description\n1,cat,x\n", encoding="utf-8")
+        with pytest.raises(ValueError) as exc:
+            load_data_files(str(tmp_path), required_columns=["id", "target", "lugar"])
+        assert "lugar" in str(exc.value)
+
+    def test_load_data_files_default_id_target(self, tmp_path):
+        from core.io.file_handlers import load_data_files
+        arquivo = tmp_path / "dados.csv"
+        arquivo.write_text("id,target,description\n1,cat,x\n", encoding="utf-8")
+        dfs = load_data_files(str(tmp_path))
+        assert len(dfs) == 1
+
+    def test_load_data_files_aceita_arquivo_com_colunas_necessarias(self, tmp_path):
+        from core.io.file_handlers import load_data_files
+        arquivo = tmp_path / "dados.csv"
+        arquivo.write_text("id,target,local\n1,cat,bra\n", encoding="utf-8")
+        dfs = load_data_files(str(tmp_path), required_columns=["id", "target", "local"])
+        assert len(dfs) == 1

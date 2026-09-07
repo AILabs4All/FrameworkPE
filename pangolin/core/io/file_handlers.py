@@ -8,15 +8,17 @@ import pandas as pd
 from ..observability.logger import setup_logger
 
 
-def load_data_files(data_dir: str) -> List[pd.DataFrame]:
+def load_data_files(data_dir: str, required_columns: List[str] = None) -> List[pd.DataFrame]:
     """
     Carrega arquivos de dados do diretório especificado.
 
     Suporta CSV, JSON, XLSX e XLS. Valida a presença das colunas obrigatórias
-    'id' e 'target' em cada arquivo carregado.
+    em cada arquivo carregado.
 
     Args:
         data_dir: Diretório contendo os arquivos de dados
+        required_columns: Colunas obrigatórias em cada arquivo; se não for
+            informado, usa ['id', 'target'].
 
     Returns:
         Lista de DataFrames carregados
@@ -26,10 +28,13 @@ def load_data_files(data_dir: str) -> List[pd.DataFrame]:
         ValueError: Se as colunas obrigatórias não forem encontradas
     """
     logger = setup_logger("FileHandler")
-    logger.info(f"Carregando arquivos de dados de: {data_dir}")
+    logger.info("Carregando arquivos de dados de: %s", data_dir)
 
     if not os.path.exists(data_dir):
         raise FileNotFoundError(f"Diretório não encontrado: {data_dir}")
+
+    if not required_columns:
+        required_columns = ['id', 'target']
 
     dataframes = []
     supported_extensions = {'.csv', '.json', '.xlsx', '.xls'}
@@ -39,7 +44,7 @@ def load_data_files(data_dir: str) -> List[pd.DataFrame]:
             continue
 
         try:
-            logger.info(f"Processando arquivo: {file_path}")
+            logger.info("Processando arquivo: %s", file_path)
 
             suffix = file_path.suffix.lower()
             if suffix == '.csv':
@@ -50,32 +55,34 @@ def load_data_files(data_dir: str) -> List[pd.DataFrame]:
                 df = pd.read_excel(file_path)
 
             if df.empty:
-                logger.warning(f"Arquivo vazio ignorado: {file_path}")
+                logger.warning("Arquivo vazio ignorado: %s", file_path)
                 continue
 
-            required_columns = ['id', 'target']
             missing_columns = [col for col in required_columns if col not in df.columns]
 
             if missing_columns:
                 available_columns = sorted(df.columns.tolist())
-                logger.error(f"Arquivo {file_path.name}: colunas obrigatórias ausentes: {missing_columns}")
+                logger.error(
+                    "Arquivo %s: colunas obrigatórias ausentes: %s",
+                    file_path.name, missing_columns,
+                )
                 raise ValueError(
                     f"Arquivo '{file_path.name}' deve conter as colunas obrigatórias: {required_columns}. "
                     f"Colunas faltando: {missing_columns}. "
                     f"Colunas disponíveis: {available_columns}"
                 )
 
-            logger.info(f"Arquivo carregado: {len(df)} linhas, {len(df.columns)} colunas")
+            logger.info("Arquivo carregado: %d linhas, %d colunas", len(df), len(df.columns))
             dataframes.append(df)
 
         except Exception as e:
-            logger.error(f"Erro ao carregar arquivo {file_path}: {e}")
+            logger.error("Erro ao carregar arquivo %s: %s", file_path, e)
             raise
 
     if not dataframes:
         raise ValueError(f"Nenhum arquivo válido encontrado em: {data_dir}")
 
-    logger.info(f"Total de arquivos carregados: {len(dataframes)}")
+    logger.info("Total de arquivos carregados: %d", len(dataframes))
     return dataframes
 
 
