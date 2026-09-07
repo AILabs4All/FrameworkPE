@@ -2,7 +2,7 @@ from core.project.pangolin_project import PangolinProject
 
 
 def cmd_apply(args):
-    """Comando: apply pg"""
+    """Comando: pg apply"""
     try:
         # Verifica se está em um projeto
         project = PangolinProject.load_from_current_dir()

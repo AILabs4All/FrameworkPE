@@ -3,10 +3,10 @@
 from core.project.pangolin_project import PangolinProject
 
 def cmd_init(args):
-    """Comando: init pg --name <name>"""
+    """Comando: pg init --name <name>"""
     if not args.name:
         print("Erro: name do projeto é obrigatório")
-        print("   Use: init pg --name <name_do_projeto>")
+        print("   Use: pg init --name <name_do_projeto>")
         return 1
     
     try:
@@ -31,7 +31,7 @@ def cmd_init(args):
         print(f"   1. cd {args.name}")
         print(f"   2. Coloque seus dados em data/")
         print(f"   3. Edite config.yaml conforme necessário")
-        print(f"   4. Execute: apply pg")
+        print(f"   4. Execute: pg apply")
         
         return 0
         

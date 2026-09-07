@@ -1,7 +1,7 @@
 from core.project.pangolin_project import PangolinProject
 
 def cmd_list(args):
-    """Comando: list pg"""
+    """Comando: pg list"""
     try:
         print("Listando projetos Pangolin...")
         

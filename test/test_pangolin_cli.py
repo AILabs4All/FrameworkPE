@@ -70,6 +70,7 @@ class TestCmdInit:
         captured = capsys.readouterr()
         assert "Próximos passos" in captured.out
         assert "config.yaml" in captured.out
+        assert "pg apply" in captured.out
 
 
 class TestPluginNamingHuggingface:

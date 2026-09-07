@@ -135,12 +135,12 @@ def main():
                                 help='Remover sem confirmacao'
     )
     
-    # list pg
+    # pg list
     list_parser = subparsers.add_parser('list',
                                         help='Listar projetos'
     )
     
-    # info pg
+    # pg info
     info_parser = subparsers.add_parser('info',
                                         help='Informacoes do projeto atual'
 )

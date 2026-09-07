@@ -1,7 +1,7 @@
 from core.project.pangolin_project import PangolinProject
 
 def cmd_info(args):
-    """Comando: info pg"""
+    """Comando: pg info"""
     try:
         # Verifica se está em um projeto
         project = PangolinProject.load_from_current_dir()
