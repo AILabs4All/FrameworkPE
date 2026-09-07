@@ -4,7 +4,7 @@ from .observability.logger import setup_logger
 # Importa os plugins de modelo
 from plugins.models.api_model import APIModel
 from plugins.models.local_model import LocalModel
-from plugins.models.hungguiface_model import HuggingfaceModel
+from plugins.models.huggingface_model import HuggingfaceModel
 try:
     from plugins.models.mock_model import MockModel
     MOCK_AVAILABLE = True

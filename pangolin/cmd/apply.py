@@ -39,7 +39,6 @@ def cmd_apply(args):
             'ollama': 'LocalModel',
             'local': 'LocalModel',
             'huggingface': 'HuggingfaceModel',
-            'hungifface': 'HuggingfaceModel',
             'openai': 'APIModel',
             'anthropic': 'APIModel',
             'gemini': 'APIModel',

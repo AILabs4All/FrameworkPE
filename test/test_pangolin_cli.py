@@ -70,3 +70,24 @@ class TestCmdInit:
         captured = capsys.readouterr()
         assert "Próximos passos" in captured.out
         assert "config.yaml" in captured.out
+
+
+class TestPluginNamingHuggingface:
+
+    def test_model_file_renomeado_para_huggingface(self):
+        models_dir = Path(__file__).resolve().parent.parent / "pangolin" / "plugins" / "models"
+        assert (models_dir / "huggingface_model.py").exists()
+        assert not (models_dir / "hungguiface_model.py").exists()
+
+    def test_nenhum_alias_typo_huggingface(self):
+        root = Path(__file__).resolve().parent.parent
+        for subdir in ("pangolin", "docs"):
+            for py_file in (root / subdir).rglob("*.py"):
+                content = py_file.read_text(encoding="utf-8")
+                assert "hungguiface" not in content, f"typo em {py_file}"
+                assert "hungifface" not in content, f"typo em {py_file}"
+
+    def test_plugin_manager_registra_huggingface(self):
+        from core.plugin_manager import PluginManager
+        pm = PluginManager()
+        assert "HuggingfaceModel" in pm.list_available_models()

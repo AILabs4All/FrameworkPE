@@ -65,7 +65,6 @@ class PangolinFramework:
             'ollama': 'LocalModel',
             'local': 'LocalModel',
             'huggingface': 'HuggingfaceModel',
-            'hungifface': 'HuggingfaceModel',
             'openai': 'APIModel',
             'anthropic': 'APIModel',
             'gemini': 'APIModel',

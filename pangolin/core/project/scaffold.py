@@ -16,8 +16,7 @@ from typing import Any, Dict, List
 _PROVIDER_TO_PLUGIN_FILE = {
     'ollama': 'local_model.py',
     'local': 'local_model.py',
-    'huggingface': 'hungguiface_model.py',
-    'hungifface': 'hungguiface_model.py',
+    'huggingface': 'huggingface_model.py',
     'openai': 'api_model.py',
     'anthropic': 'api_model.py',
     'gemini': 'api_model.py',

@@ -86,7 +86,7 @@ FrameworkPE/
 │   │   │   ├── base_model.py         # Classe abstrata BaseModel
 │   │   │   ├── api_model.py          # APIModel via LiteLLM
 │   │   │   ├── local_model.py        # LocalModel via Ollama
-│   │   │   └── hungguiface_model.py  # HuggingfaceModel
+│   │   │   └── huggingface_model.py # HuggingfaceModel
 │   │   └── prompts/
 │   │       ├── base_prompt.py        # BasePromptPlugin (abstrata)
 │   │       ├── schema_prompt_plugin.py  # Plugin genérico (executa qualquer schema)
