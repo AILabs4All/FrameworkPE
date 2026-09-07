@@ -2,6 +2,7 @@
 PangolinProject — representa e gerencia o ciclo de vida de um projeto isolado.
 """
 
+import os
 import shutil
 import yaml
 from datetime import datetime
@@ -108,8 +109,25 @@ class PangolinProject:
         """Remove completamente o projeto do disco."""
         if not self.project_path.exists():
             raise ValueError(f"Projeto '{self.project_name}' não existe")
+        if not self.config_file.exists():
+            raise ValueError(
+                f"Recusa remover '{self.project_path}': config.yaml ausente. "
+                "Isso não parece ser um projeto Pangolin."
+            )
+
+        data_count = len(list(self.data_dir.glob("*"))) if self.data_dir.exists() else 0
+        output_count = len(list(self.output_dir.glob("*"))) if self.output_dir.exists() else 0
+        self.logger.info(
+            "Removendo projeto '%s': %d arquivo(s) em data/, %d arquivo(s) em output/",
+            self.project_name, data_count, output_count,
+        )
+
+        # O cwd não pode ser um diretório que será removido.
+        if Path.cwd().resolve() == self.project_path.resolve():
+            os.chdir(self.project_path.parent)
+
         shutil.rmtree(self.project_path)
-        self.logger.info(f"Projeto '{self.project_name}' removido")
+        self.logger.info("Projeto '%s' removido", self.project_name)
 
     # ------------------------------------------------------------------
     # Configuração
@@ -243,15 +261,26 @@ class PangolinProject:
     @staticmethod
     def find_project_root(start_path: Optional[Path] = None) -> Optional[Path]:
         """
-        Sobe na hierarquia de diretórios procurando config.yaml.
+        Sobe na hierarquia de diretórios procurando um projeto Pangolin.
+
+        Só é considerado projeto um diretório cujo config.yaml contenha a
+        seção "project" (para não aceitar config.yaml de outros sistemas).
 
         Returns:
-            Path do diretório contendo config.yaml, ou None se não encontrado.
+            Path do diretório do projeto, ou None se não encontrado.
         """
         current = (start_path or Path.cwd()).resolve()
         while current != current.parent:
-            if (current / "config.yaml").exists():
-                return current
+            config_file = current / "config.yaml"
+            if config_file.exists():
+                try:
+                    with open(config_file, 'r', encoding='utf-8') as f:
+                        config = yaml.safe_load(f)
+                    if isinstance(config, dict) and isinstance(config.get("project"), dict):
+                        return current
+                except yaml.YAMLError:
+                    # config.yaml quebrado não é um projeto Pangolin válido
+                    pass
             current = current.parent
         return None
 

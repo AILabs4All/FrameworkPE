@@ -1,7 +1,8 @@
 from core.project.pangolin_project import PangolinProject
+from pathlib import Path
 
 def cmd_destroy(args):
-    """Comando: destroy pg --name <name>"""
+    """Comando: pg destroy --name <name>"""
     if not args.name:
         print("Erro: Nome do projeto e obrigatorio")
         print("   Use: pg destroy --name <name_do_projeto>")
@@ -28,12 +29,17 @@ def cmd_destroy(args):
         
         print(f"\nRemovendo projeto '{args.name}'...")
         
-        # Remove projeto
-        project.destroy()
+        # Remove projeto (troca o cwd para o parent internamente, se necessário)
+        projeto = project
+        cwd_antes = Path.cwd()
+        parent_antes = None
+        if cwd_antes.resolve() == project.project_path.resolve():
+            parent_antes = project.project_path.parent
+        projeto.destroy()
         
         print(f"Projeto '{args.name}' removido com sucesso!")
-        print(f"\nDica: Voce ainda esta no diretorio que foi removido")
-        print(f"   Execute: cd ..")
+        if parent_antes is not None:
+            print(f"\nAgora você está em: {Path.cwd()}")
         
         return 0
         

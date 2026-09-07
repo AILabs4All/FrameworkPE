@@ -222,3 +222,70 @@ class TestFrameworkFailFast:
                     )
         assert "não reconhecido" in str(exc.value)
         assert "Você quis dizer" in str(exc.value)
+
+
+class TestDestroySecurity:
+
+    def _criar_projeto_disk(self, tmp_path, name="proj"):
+        from core.project.pangolin_project import PangolinProject
+        from core.project import scaffold
+        cfg = {
+            "project": {"name": name, "description": "x", "created_at": "2026-01-01",
+                        "version": "1.0.0"},
+            "data": {"input_columns": ["description"], "required_columns": ["id", "target"]},
+            "models": [{"name": "m", "provider": "ollama"}],
+            "prompt": {"technique": ["zeroshot"], "schema_dir": "schema"},
+            "output": {"format": "json", "save_metrics": True, "save_logs": True},
+        }
+        p = PangolinProject(name, base_dir=str(tmp_path))
+        scaffold.create_project_structure(p)
+        scaffold.write_config(p, cfg)
+        return p
+
+    def test_find_project_root_ignora_config_sem_secao_project(self, tmp_path, monkeypatch):
+        (tmp_path / "config.yaml").write_text("foo: bar\n", encoding="utf-8")
+        (tmp_path / "nested").mkdir()
+        monkeypatch.chdir(tmp_path / "nested")
+        from core.project.pangolin_project import PangolinProject
+        assert PangolinProject.find_project_root() is None
+
+    def test_find_project_root_aceita_config_com_secao_project(self, tmp_path, monkeypatch):
+        (tmp_path / "config.yaml").write_text(
+            "project:\n  name: x\n", encoding="utf-8"
+        )
+        (tmp_path / "nested").mkdir()
+        monkeypatch.chdir(tmp_path / "nested")
+        from core.project.pangolin_project import PangolinProject
+        assert PangolinProject.find_project_root().resolve() == tmp_path.resolve()
+
+    def test_find_project_root_ignora_config_yaml_quebrado(self, tmp_path, monkeypatch):
+        (tmp_path / "config.yaml").write_text("a: [quebrado\n", encoding="utf-8")
+        monkeypatch.chdir(tmp_path)
+        from core.project.pangolin_project import PangolinProject
+        assert PangolinProject.find_project_root() is None
+
+    def test_destroy_recusa_remover_sem_config_yaml(self, tmp_path):
+        from core.project.pangolin_project import PangolinProject
+        p = PangolinProject("proj", base_dir=str(tmp_path))
+        p.project_path.mkdir(parents=True)
+        with pytest.raises(ValueError) as exc:
+            p.destroy()
+        assert "config.yaml ausente" in str(exc.value)
+        assert p.project_path.exists()
+
+    def test_destroy_chdir_para_parent(self, tmp_path, monkeypatch):
+        p = self._criar_projeto_disk(tmp_path)
+        (p.data_dir / "dados.csv").write_text("id,target\n1,cat\n", encoding="utf-8")
+        (p.output_dir / "saida.json").write_text("[]", encoding="utf-8")
+        monkeypatch.chdir(p.project_path)
+        p.destroy()
+        assert not p.project_path.exists()
+        assert Path.cwd().resolve() == tmp_path.resolve()
+
+    def test_destroy_conta_arquivos_antes_de_remover(self, tmp_path, monkeypatch):
+        p = self._criar_projeto_disk(tmp_path)
+        (p.data_dir / "dados.csv").write_text("id,target\n1,cat\n", encoding="utf-8")
+        (p.output_dir / "saida.json").write_text("[]", encoding="utf-8")
+        monkeypatch.chdir(p.project_path)
+        p.destroy()
+        assert not p.project_path.exists()
