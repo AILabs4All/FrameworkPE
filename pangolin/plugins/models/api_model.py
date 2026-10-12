@@ -64,8 +64,19 @@ class APIModel(BaseModel):
                 completion_kwargs["deployment_id"] = self.deployment
 
             completion_kwargs.update(self.extra_params)
+            framework_options = {
+                "mode",
+                "incident_id",
+                "max_iterations",
+                "rate_limit",
+                "messages",
+            }
             completion_kwargs.update(
-                {k: v for k, v in kwargs.items() if k not in completion_kwargs and k != "mode"}
+                {
+                    key: value
+                    for key, value in kwargs.items()
+                    if key not in completion_kwargs and key not in framework_options
+                }
             )
 
             response = litellm.completion(**completion_kwargs)

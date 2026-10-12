@@ -1,6 +1,6 @@
 """Module for handling the init command to create new Pangolin projects."""
 
-from core.project.pangolin_project import PangolinProject
+from pangolin.core.project.pangolin_project import PangolinProject
 
 def cmd_init(args):
     """Comando: pg init --name <name>"""

@@ -50,8 +50,24 @@ class LocalModel(BaseModel):
             return f"Erro ao executar modelo local: {exc}"
 
     def _merge_params(self, kwargs: Dict[str, Any]) -> Dict[str, Any]:
-        merged = dict(self.extra_params)
-        merged.update({k: v for k, v in kwargs.items() if k not in ["mode", "messages"]})
+        framework_options = {
+            "mode",
+            "messages",
+            "temperature",
+            "max_tokens",
+            "rate_limit",
+            "incident_id",
+            "max_iterations",
+        }
+        merged = {
+            key: value
+            for key, value in self.extra_params.items()
+            if key not in framework_options
+            and key not in {"temperature", "max_tokens", "api_base"}
+        }
+        merged.update(
+            {key: value for key, value in kwargs.items() if key not in framework_options}
+        )
         return merged
 
     def _build_model_identifier(self) -> str:

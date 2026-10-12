@@ -8,8 +8,8 @@ from typing import Any, Dict, Optional
 
 import tiktoken
 
-from core.observability.logger import setup_logger
-from core.observability.metrics import TokenMetrics
+from pangolin.core.observability.logger import setup_logger
+from pangolin.core.observability.metrics import TokenMetrics
 
 
 class BaseModel(ABC):

@@ -1,4 +1,4 @@
-from core.project.pangolin_project import PangolinProject
+from pangolin.core.project.pangolin_project import PangolinProject
 
 
 def cmd_apply(args):
@@ -30,7 +30,7 @@ def cmd_apply(args):
         # Valida disponibilidade de modelos e prompts
         print("\nValidando disponibilidade de plugins...")
         
-        from core.plugin_manager import PluginManager
+        from pangolin.core.plugin_manager import PluginManager
         
         plugin_manager = PluginManager()
         
@@ -76,14 +76,14 @@ def cmd_apply(args):
         # Mostra arquivos importados
         imported_files = result.get('imported_files', {})
         models_imported = imported_files.get('models', [])
-        prompts_imported = imported_files.get('prompts', [])
+        schemas_imported = imported_files.get('schemas', [])
         
-        if models_imported or prompts_imported:
+        if models_imported or schemas_imported:
             print(f"\nArquivos importados:")
             if models_imported:
                 print(f"   Modelos: {', '.join(models_imported)}")
-            if prompts_imported:
-                print(f"   Prompts: {', '.join(prompts_imported)}")
+            if schemas_imported:
+                print(f"   Schemas: {', '.join(schemas_imported)}")
         
         print(f"\nResumo da configuracao:")
         

@@ -9,15 +9,24 @@ def read_file(filename):
         return file_path.read_text(encoding="utf-8")
     return ""
 
+
+def read_requirements():
+    """Lê as dependências de runtime da fonte única requirements.txt."""
+    requirements_file = BASE_DIR / "requirements.txt"
+    return [
+        line.strip()
+        for line in requirements_file.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+
 setup(
-    name="pangolin-cli",  # 🔥 melhor nome (evita conflito)
+    name="pangolin-cli",
     version="2.0.0",
     description="CLI para gerenciamento de experimentos com prompts e LLMs",
     long_description=read_file("README.md"),
     long_description_content_type="text/markdown",
 
-    author="Pangolin Team",
-    url="https://github.com/your-repo/pangolin",
+    author="Pangolin contributors",
 
     packages=find_packages(
         exclude=[
@@ -31,32 +40,8 @@ setup(
         ]
     ),
 
-    python_requires=">=3.8",
-
-    install_requires=[
-        "pandas>=2.1",
-        "openpyxl>=3.1",
-        "openai>=1.6",
-        #"transformers>=4.36",
-        #"torch>=2.1",
-        "rouge-score>=0.1",
-        "huggingface-hub>=0.20",
-        "psutil>=5.9",
-        "tqdm>=4.66",
-        "tiktoken>=0.5",
-        "numpy>=1.24",
-        "requests>=2.31",
-        "tokenizers>=0.15",
-        "safetensors>=0.4",
-        "fastuuid>=0.13",
-        "filelock>=3.18",
-        "python-dotenv",
-        "aiohttp",
-        "litellm<=1.82.6",
-        "pyyaml",
-        "typer[all]",   # 🔥 CLI moderno
-        "rich"          # 🔥 output bonito
-    ],
+    python_requires=">=3.9",
+    install_requires=read_requirements(),
 
     extras_require={
         "dev": [
@@ -66,6 +51,10 @@ setup(
             "flake8>=6.0",
             "mypy>=1.0",
         ],
+        "huggingface": [
+            "torch>=2.1",
+            "transformers>=4.36",
+        ],
         "docs": [
             "sphinx>=5.0",
             "sphinx-rtd-theme>=1.2",
@@ -74,7 +63,7 @@ setup(
 
     entry_points={
         "console_scripts": [
-            "pg=pangolin.cli:main",  # ✅ corrigido
+            "pg=pangolin.cli:main",
         ],
     },
 
@@ -85,6 +74,7 @@ setup(
             "config/*.json",
             "config/*.yaml",
             "config/*.yml",
+            "schemas/*.yaml",
         ],
     },
 
@@ -97,10 +87,10 @@ setup(
         "Topic :: Utilities",
         "License :: OSI Approved :: MIT License",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
     ],
 
     keywords=[
@@ -112,12 +102,6 @@ setup(
         "experiments",
         "pangolin",
     ],
-
-    project_urls={
-        "Bug Reports": "https://github.com/your-repo/pangolin/issues",
-        "Source": "https://github.com/your-repo/pangolin",
-        "Documentation": "https://github.com/your-repo/pangolin#readme",
-    },
 
     zip_safe=False,
 )

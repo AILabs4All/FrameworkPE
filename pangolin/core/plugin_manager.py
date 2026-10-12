@@ -5,11 +5,11 @@ import difflib
 from .observability.logger import setup_logger
 
 # Importa os plugins de modelo
-from plugins.models.api_model import APIModel
-from plugins.models.local_model import LocalModel
-from plugins.models.huggingface_model import HuggingfaceModel
+from pangolin.plugins.models.api_model import APIModel
+from pangolin.plugins.models.local_model import LocalModel
+from pangolin.plugins.models.huggingface_model import HuggingfaceModel
 try:
-    from plugins.models.mock_model import MockModel
+    from pangolin.plugins.models.mock_model import MockModel
     MOCK_AVAILABLE = True
 except ImportError:
     MOCK_AVAILABLE = False
@@ -17,38 +17,28 @@ except ImportError:
 # Nota: Plugins de prompt agora são gerenciados via schemas YAML
 # e execução genérica através do SchemaPromptPlugin
 
-# Fonte única de verdade para resolução de providers e técnicas.
-# Não manter cópias divergentes deste mapa em outros módulos.
-PROVIDER_TO_MODEL = {
-    'ollama': 'LocalModel',
-    'local': 'LocalModel',
-    'huggingface': 'HuggingfaceModel',
-    'openai': 'APIModel',
-    'anthropic': 'APIModel',
-    'gemini': 'APIModel',
-    'google': 'APIModel',
-    'cohere': 'APIModel',
-    'azure': 'APIModel',
-    'bedrock': 'APIModel',
-    'vertex': 'APIModel',
-    'palm': 'APIModel',
+# Única tabela de providers: plugin em memória e arquivo de projeto ficam
+# vinculados na mesma entrada, evitando mapas que possam divergir.
+_PROVIDER_SPECS = {
+    'ollama': ('LocalModel', 'local_model.py'),
+    'local': ('LocalModel', 'local_model.py'),
+    'huggingface': ('HuggingfaceModel', 'huggingface_model.py'),
+    'openai': ('APIModel', 'api_model.py'),
+    'anthropic': ('APIModel', 'api_model.py'),
+    'gemini': ('APIModel', 'api_model.py'),
+    'google': ('APIModel', 'api_model.py'),
+    'cohere': ('APIModel', 'api_model.py'),
+    'deepseek': ('APIModel', 'api_model.py'),
+    'groq': ('APIModel', 'api_model.py'),
+    'azure': ('APIModel', 'api_model.py'),
+    'bedrock': ('APIModel', 'api_model.py'),
+    'vertex': ('APIModel', 'api_model.py'),
+    'palm': ('APIModel', 'api_model.py'),
 }
 
-# Arquivo de plugin copiado para o diretório model/ do projeto (vendorização).
-MODEL_MODULE_FILES = {
-    'ollama': 'local_model.py',
-    'local': 'local_model.py',
-    'huggingface': 'huggingface_model.py',
-    'openai': 'api_model.py',
-    'anthropic': 'api_model.py',
-    'gemini': 'api_model.py',
-    'google': 'api_model.py',
-    'cohere': 'api_model.py',
-    'azure': 'api_model.py',
-    'bedrock': 'api_model.py',
-    'vertex': 'api_model.py',
-    'palm': 'api_model.py',
-}
+# Aliases mantidos para consumidores que importam esses mapas.
+PROVIDER_TO_MODEL = {name: spec[0] for name, spec in _PROVIDER_SPECS.items()}
+MODEL_MODULE_FILES = {name: spec[1] for name, spec in _PROVIDER_SPECS.items()}
 
 _SCHEMAS_DIR = Path(__file__).resolve().parent.parent / "schemas"
 

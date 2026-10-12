@@ -1,254 +1,189 @@
-# Pangolin — Prompt Engineering Framework
+# Pangolin
 
-**Pangolin** é um framework Python modular e extensível para experimentação sistemática com técnicas de *Prompt Engineering* em Modelos de Linguagem de Grande Escala (LLMs). Ele organiza experimentos em projetos isolados, suporta múltiplos provedores de LLM e disponibiliza seis técnicas avançadas de prompting prontas para uso — todas configuráveis via YAML, sem necessidade de alterar código.
-
----
-
-## Índice
-
-- [Visão Geral](#visão-geral)
-- [Requisitos](#requisitos)
-- [Instalação](#instalação)
-- [Fluxo de Trabalho Básico](#fluxo-de-trabalho-básico)
-- [Técnicas de Prompt Disponíveis](#técnicas-de-prompt-disponíveis)
-- [Provedores de Modelos Suportados](#provedores-de-modelos-suportados)
-- [Documentação Completa](#documentação-completa)
-
----
-
-## Visão Geral
-
-O Pangolin resolve o problema de **reprodutibilidade e comparação em experimentos com LLMs**. Cada projeto tem sua própria estrutura isolada de dados, schemas de prompt, plugins de modelo, logs e resultados — permitindo executar e comparar múltiplas técnicas e modelos de forma sistemática.
-
-### Características Principais
-
-| Recurso | Descrição |
-|---|---|
-| **Projetos isolados** | Cada experimento tem sua própria área de trabalho autossuficiente |
-| **Agnóstico ao domínio** | Funciona para qualquer tarefa de classificação ou análise textual |
-| **6 técnicas embutidas** | Progressive Hint, Self-Hint, Hypothesis Testing, Progressive Rectification, Free Prompt, Zero-Shot |
-| **Multi-modelo** | Execute a mesma técnica em vários LLMs simultâneamente |
-| **Schemas declarativos** | Crie e customize técnicas editando apenas arquivos YAML |
-| **Métricas integradas** | Rastreamento automático de tokens, tempo, memória e ROUGE |
-| **Múltiplos formatos** | Entrada e saída em CSV, JSON ou XLSX |
-| **Credenciais dinâmicas** | Resolução automática de chaves de API via `.env` |
-
----
+Pangolin é um framework Python para comparar estratégias de *prompt engineering*
+em tarefas que recebem dados tabulares e produzem respostas de LLM. Um projeto
+Pangolin reúne configuração, dados, schemas de prompt, resultados e logs. O
+framework chama modelos por APIs compatíveis com LiteLLM, pelo Ollama ou pelo
+plugin local de Transformers.
 
 ## Requisitos
 
-- Python 3.8 ou superior
-- `pip` atualizado
-
-Para modelos locais:
-- [Ollama](https://ollama.com) instalado e em execução
-
----
+- Python 3.9 ou superior.
+- Ollama instalado e em execução para usar modelos locais via Ollama.
+- Credencial e dependências apropriadas para o provider escolhido.
 
 ## Instalação
 
-```bash
-# Clone o repositório ou entre no diretório do framework
-cd FrameworkPE
-
-# Crie e ative o ambiente virtual (recomendado)
-python3 -m venv venv
-source venv/bin/activate          # Linux / macOS
-# venv\Scripts\activate           # Windows
-
-# Atualize ferramentas de build
-pip install --upgrade pip setuptools wheel
-
-# Instale o Pangolin em modo editável
-pip install -e .
-```
-
-Após a instalação, o comando `pg` estará disponível no ambiente virtual:
+Na raiz deste repositório:
 
 ```bash
+python -m venv venv
+source venv/bin/activate        # Linux/macOS
+# venv\Scripts\activate       # Windows PowerShell
+python -m pip install --upgrade pip
+python -m pip install -e .
 pg --help
 ```
 
-### Configuração de Credenciais
+`pg` é a única interface de linha de comando. Ela é implementada em
+`pangolin/cli.py` com Typer. O runtime suporta Python 3.9 ou superior porque
+Pandas 2.1, dependência do pacote, não suporta Python 3.8.
 
-Crie um arquivo `.env` na raiz do seu projeto de experimento com as chaves das APIs que irá utilizar:
-
-```dotenv
-OPENAI_API_KEY=sk-...
-ANTHROPIC_API_KEY=sk-ant-...
-GEMINI_API_KEY=...
-DEEPSEEK_API_KEY=...
-GROQ_API_KEY=...
-
-# Endpoints customizados (opcional)
-OLLAMA_BASE_URL=http://localhost:11434
-```
-
-O Pangolin resolve as credenciais automaticamente a partir do padrão `{PROVIDER}_API_KEY`.
-
----
-
-## Fluxo de Trabalho Básico
-
-Todo experimento no Pangolin segue quatro etapas:
-
-```
-pg init → editar config.yaml → pg apply → pg run
-```
-
-### 1. Inicializar o projeto
+## Começar um experimento
 
 ```bash
 pg init --name meu_experimento
+cd meu_experimento
 ```
 
-Cria a seguinte estrutura:
-
-```
-meu_experimento/
-├── data/           # Coloque seus arquivos CSV/JSON/XLSX aqui
-├── schema/         # Schemas YAML das técnicas de prompt
-├── model/          # Plugins de modelo (preenchido pelo apply)
-├── logs/           # Logs e métricas de execução
-├── output/         # Resultados gerados
-├── config.yaml     # Configuração central do projeto
-└── README.md
-```
-
-### 2. Adicionar dados e configurar
-
-```bash
-# Copie seus dados de entrada para data/
-cp /caminho/para/dados.csv meu_experimento/data/
-
-# Edite a configuração do projeto
-nano meu_experimento/config.yaml
-```
-
-Exemplo mínimo de `config.yaml`:
+O comando cria `data/`, `schema/`, `model/`, `logs/`, `output/` e
+`config.yaml`. Coloque um CSV, JSON ou XLSX em `data/` e ajuste a configuração:
 
 ```yaml
 project:
   name: meu_experimento
-  description: "Classificação de e-mails"
+  description: Comparação de estratégias de prompt
 
 data:
-  input_columns: [assunto, corpo]
-  required_columns: [id, categoria_real]
+  input_columns: [descricao]
+  required_columns: [id]
 
 models:
-  - name: gpt-4o-mini
-    provider: openai
+  - name: gemma2:9b
+    provider: ollama
     temperature: 0.2
     max_tokens: 1024
 
 prompt:
-  technique: [progressive_hint]
+  technique: [zeroshot, progressive_hint]
   schema_dir: schema
 
 output:
-  format: csv
+  format: json
   save_metrics: true
   save_logs: true
 ```
 
-### 3. Aplicar configurações
+Cada arquivo de entrada precisa conter as colunas de `required_columns` e
+`input_columns`. As colunas de entrada são concatenadas e enviadas ao modelo.
+Configure API keys no ambiente ou em um `.env` na raiz do projeto; não coloque
+segredos no `config.yaml` nem versione `.env`.
+
+```dotenv
+OPENAI_API_KEY=...
+ANTHROPIC_API_KEY=...
+GEMINI_API_KEY=...
+```
+
+Para mudar o endpoint do Ollama, defina `base_url` no item do modelo em
+`config.yaml`.
+
+Valide a configuração e copie os schemas padrão selecionados:
 
 ```bash
-cd meu_experimento
 pg apply
 ```
 
-O `apply` valida o `config.yaml` e copia para o projeto os schemas YAML e plugins de modelo correspondentes às técnicas e provedores configurados.
-
-### 4. Executar o experimento
+Execute o experimento:
 
 ```bash
 pg run
 ```
 
-Ou sobrescrever configurações diretamente via CLI:
+Os resultados são gravados em `output/` por modelo e técnica; logs e métricas
+ficam em `logs/`. Os valores de `save_metrics` e `save_logs` são aceitos na
+configuração, mas ainda não controlam a persistência em todos os componentes.
+Consulte [a referência de configuração](docs/CONFIG_REFERENCE.md) para o
+comportamento detalhado.
 
-```bash
-pg run --model anthropic/claude-3-haiku-20240307 --technique self_hint --output json
-```
+Os logs de interação incluem prompt e resposta completos em JSON. Restrinja o
+acesso a `logs/` se os dados puderem conter informações sensíveis. A contagem
+local de tokens é uma estimativa e pode divergir do consumo registrado pelo
+provider.
 
-### Outros Comandos
+## CLI
 
-```bash
-# Ver resumo do projeto atual (estrutura, arquivos, config)
-pg info
-
-# Listar projetos existentes
-pg list
-
-# Remover o projeto e todos os seus arquivos
-pg destroy --name meu_experimento
-```
-
----
-
-## Técnicas de Prompt Disponíveis
-
-| Técnica | Identificador | Descrição |
-|---|---|---|
-| **Progressive Hint** | `progressive_hint` | Fornece dicas progressivas ao modelo para refinamento iterativo da resposta |
-| **Self-Hint** | `self_hint` | O modelo elabora um plano próprio antes de classificar |
-| **Hypothesis Testing** | `hypothesis_testing` | Testa hipóteses para cada categoria sistematicamente |
-| **Progressive Rectification** | `progressive_rectification` | Usa mascaramento e retificação progressiva para corrigir erros |
-| **Free Prompt** | `free_prompt` | Prompt flexível com exemplos e dicas configuráveis |
-| **Zero-Shot** | `zeroshot` | Classificação direta sem exemplos pré-definidos |
-
-Para detalhes técnicos de cada técnica, consulte [SCHEMAS_REFERENCIA_RAPIDA.md](SCHEMAS_REFERENCIA_RAPIDA.md).
-
----
-
-## Provedores de Modelos Suportados
-
-O Pangolin usa [LiteLLM](https://github.com/BerriAI/litellm) para comunicação com APIs, cobrindo a grande maioria dos provedores disponíveis no mercado.
-
-| Provedor | `provider` | Variável de ambiente |
-|---|---|---|
-| OpenAI | `openai` | `OPENAI_API_KEY` |
-| Anthropic | `anthropic` | `ANTHROPIC_API_KEY` |
-| Google Gemini | `gemini` | `GEMINI_API_KEY` |
-| DeepSeek | `deepseek` | `DEEPSEEK_API_KEY` |
-| Groq | `groq` | `GROQ_API_KEY` |
-| Azure OpenAI | `azure` | `AZURE_API_KEY` + `AZURE_BASE_URL` |
-| AWS Bedrock | `bedrock` | Credenciais AWS padrão |
-| Ollama (local) | `ollama` | — (requer Ollama instalado) |
-| HuggingFace | `huggingface` | `HUGGINGFACE_API_KEY` |
-
-### Executar com múltiplos modelos
-
-Declare uma lista em `models` no `config.yaml` para executar a mesma técnica em todos os modelos automaticamente:
-
-```yaml
-models:
-  - name: gpt-4o-mini
-    provider: openai
-    temperature: 0.2
-    max_tokens: 2048
-
-  - name: claude-3-haiku-20240307
-    provider: anthropic
-    temperature: 0.2
-    max_tokens: 2048
-
-  - name: gemma2:9b
-    provider: ollama
-    temperature: 0.2
-    max_tokens: 2048
-```
-
----
-
-## Documentação Completa
-
-| Documento | Conteúdo |
+| Comando | Ação |
 |---|---|
-| [GUIA_ARQUITETURA_PROMPTS.md](docs/GUIA_ARQUITETURA_PROMPTS.md) | Arquitetura interna, componentes, fluxo de execução, como estender o framework |
-| [SCHEMAS_REFERENCIA_RAPIDA.md](docs/SCHEMAS_REFERENCIA_RAPIDA.md) | Referência técnica de todos os schemas de prompt e campos disponíveis |
-| [CONFIG_REFERENCE.md](docs/CONFIG_REFERENCE.md) | Referência completa de todos os campos do `config.yaml` |
-| [DATASETS_GUIDE.md](docs/DATASETS_GUIDE.md) | Guia de formatação e preparação de datasets |
-| [NEW_PROJECT_GUIDE.md](docs/NEW_PROJECT_GUIDE.md) | Guia passo a passo para criar e configurar um novo projeto |
+| `pg init --name NOME` | Cria projeto no diretório atual |
+| `pg apply` | Valida configuração e importa schemas do framework |
+| `pg run` | Executa os modelos e técnicas configurados |
+| `pg run --model NOME` | Executa somente um modelo já declarado no YAML |
+| `pg run --technique NOME` | Sobrescreve as técnicas com uma técnica |
+| `pg run --columns a,b` | Sobrescreve as colunas de entrada |
+| `pg run --output csv\|json\|xlsx` | Sobrescreve o formato de saída |
+| `pg run --temperature 0.2` | Sobrescreve a temperatura do modelo |
+| `pg run --max-tokens 1024` | Sobrescreve o limite de tokens da resposta |
+| `pg run --max-iterations 3` | Sobrescreve o limite de iterações da estratégia |
+| `pg info` | Mostra informações do projeto atual |
+| `pg list` | Lista projetos no diretório atual |
+| `pg destroy --name NOME` | Pede confirmação e remove o projeto atual |
+| `pg destroy --name NOME --force` | Remove sem confirmação |
+
+Use `pg <comando> --help` para ver as opções. `--model` seleciona um modelo
+por seu campo `name` em `config.yaml`; não aceita um identificador provider/model
+inventado na linha de comando.
+
+## Providers e modelos
+
+O suporte é definido centralmente em `pangolin/core/plugin_manager.py`.
+
+| Provider | Implementação | Observação |
+|---|---|---|
+| `openai`, `anthropic`, `gemini`, `google`, `cohere`, `deepseek`, `groq` | `APIModel` / LiteLLM | A chave de ambiente segue `{PROVIDER}_API_KEY`; consulte também os requisitos do LiteLLM |
+| `azure`, `bedrock`, `vertex`, `palm` | `APIModel` / LiteLLM | Exigem configuração específica do provider além dos parâmetros comuns |
+| `ollama`, `local` | `LocalModel` / LiteLLM | Ollama deve estar acessível; endpoint padrão `http://localhost:11434` |
+| `huggingface` | `HuggingfaceModel` | Requer `torch` e `transformers`, que não são instalados pelas dependências base atuais |
+
+Para instalar o suporte opcional ao Hugging Face local, use
+`python -m pip install -e '.[huggingface]'`.
+
+`HuggingfaceModel` carrega modelos locais do Transformers; não é o mesmo caminho
+que chamar uma API hospedada do Hugging Face. Veja
+[a documentação de providers e configuração](docs/CONFIG_REFERENCE.md).
+
+## Técnicas de prompt
+
+Os schemas padrão estão em `pangolin/schemas/` e podem ser personalizados em
+`<projeto>/schema/`.
+
+| Identificador | Estratégia |
+|---|---|
+| `zeroshot` | Classificação direta sem exemplos fornecidos |
+| `free_prompt` | Prompt livre configurável |
+| `progressive_hint` | Refinamento iterativo com dicas |
+| `self_hint` | Planejamento seguido de classificação |
+| `hypothesis_testing` | Teste de categorias com palavras-chave |
+| `progressive_rectification` | Classificação e retificação iterativas |
+
+O campo `strategy` do schema seleciona a implementação executada por
+`SchemaPromptPlugin`. Consulte o [guia de schemas](docs/SCHEMAS_REFERENCIA_RAPIDA.md)
+antes de adicionar uma técnica.
+
+## Estrutura do pacote
+
+```text
+pangolin/
+├── cli.py                 # Única interface CLI (Typer)
+├── cmd/                   # Handlers dos comandos usados pela CLI
+├── core/
+│   ├── config/            # Leitura e validação
+│   ├── project/           # Projeto, configuração e scaffold
+│   ├── io/                # Dados e serialização
+│   ├── observability/     # Logs e métricas
+│   ├── framework.py       # Orquestração de experimentos
+│   └── plugin_manager.py  # Registro e resolução de providers
+├── plugins/
+│   ├── models/            # Adaptadores de modelos
+│   └── prompts/           # Configuração e execução das estratégias
+└── schemas/               # Schemas padrão em YAML
+```
+
+## Documentação
+
+- [Arquitetura e contratos de extensão](docs/ARCHITECTURE.md)
+- [Referência de configuração](docs/CONFIG_REFERENCE.md)
+- [Guia de datasets](docs/DATASETS_GUIDE.md)
+- [Guia de criação de projetos](docs/NEW_PROJECT_GUIDE.md)
+- [Referência de schemas](docs/SCHEMAS_REFERENCIA_RAPIDA.md)
+- [Guia de arquitetura das estratégias](docs/GUIA_ARQUITETURA_PROMPTS.md)

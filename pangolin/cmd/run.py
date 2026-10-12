@@ -1,6 +1,6 @@
-from core.project.pangolin_project import PangolinProject
-from core.framework import PangolinFramework
-from core.observability.logger import setup_logger
+from pangolin.core.project.pangolin_project import PangolinProject
+from pangolin.core.framework import PangolinFramework
+from pangolin.core.observability.logger import setup_logger
 from dotenv import load_dotenv
 
 
@@ -87,11 +87,11 @@ def run_command(
         framework = PangolinFramework(project=project)
 
         technique_params = {}
-        if max_iterations:
+        if max_iterations is not None:
             technique_params['max_iterations'] = max_iterations
-        if temperature:
+        if temperature is not None:
             technique_params['temperature'] = temperature
-        if max_tokens:
+        if max_tokens is not None:
             technique_params['max_tokens'] = max_tokens
 
         print(f"\nRodando experimento")
@@ -116,7 +116,15 @@ def run_command(
 
         print("\nConcluido")
         if all_results:
-            print(f"Output final: {all_results[-1].get('output_file')}")
+            output_files = [
+                path
+                for result in all_results
+                for path in result.get("output_files", [])
+            ]
+            if output_files:
+                print("Arquivos de saída:")
+                for output_file in output_files:
+                    print(f"  {output_file}")
 
         return 0
 

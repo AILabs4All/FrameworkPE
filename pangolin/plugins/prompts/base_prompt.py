@@ -4,7 +4,7 @@ import pandas as pd
 import re
 import json
 from difflib import SequenceMatcher
-from core.observability.logger import setup_logger
+from pangolin.core.observability.logger import setup_logger
 
 
 class BasePromptPlugin(ABC):

@@ -4,8 +4,8 @@ import tqdm
 from pathlib import Path
 
 from .plugin_manager import PluginManager
-from plugins.prompts.schema_prompt_plugin import SchemaPromptPlugin
-from plugins.prompts.config import PromptConfigFactory
+from pangolin.plugins.prompts.schema_prompt_plugin import SchemaPromptPlugin
+from pangolin.plugins.prompts.config import PromptConfigFactory
 from .observability.logger import setup_logger
 from .io.file_handlers import load_data_files, save_results, validate_columns
 from .observability.metrics import MetricsCollector
@@ -56,7 +56,7 @@ class PangolinFramework:
                 
             # Valida colunas
             if not validate_columns(dataframes, columns):
-                raise ValueError("Colunas obrigatórias não encontradas")
+                raise ValueError("Colunas de entrada ausentes em um ou mais arquivos")
                 
         except Exception as e:
             self.logger.error(f"Erro ao carregar dados: {e}")
@@ -97,14 +97,14 @@ class PangolinFramework:
             for result in results:
                 result['technique_used'] = technique
 
-            # Salva CSV individual por técnica
+            # Mantém a extensão e o formato solicitados alinhados.
             if self.project:
                 output_path = str(self.project.get_results_path(f"resultados_{model_name}_{technique}"))
             else:
                 output_path = f"resultados_{model_name}_{technique}"
 
-            save_results(results, output_path, "csv")
-            output_files.append(f"{output_path}.csv")
+            save_results(results, output_path, output_format)
+            output_files.append(f"{output_path}.{output_format.lower()}")
 
             all_results.extend(results)
 

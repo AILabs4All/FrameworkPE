@@ -143,25 +143,29 @@ def save_xlsx(results: List[Dict[str, Any]], file_path: str, **kwargs) -> None:
 
 def validate_columns(dataframes: List[pd.DataFrame], required_columns: List[str]) -> bool:
     """
-    Verifica se todas as colunas obrigatórias estão presentes no conjunto de DataFrames.
+    Verifica se todas as colunas obrigatórias existem em cada DataFrame.
 
     Returns:
-        True se todas as colunas existem em pelo menos um DataFrame
+        True somente se todos os DataFrames contêm todas as colunas pedidas.
     """
     logger = setup_logger("FileHandler")
 
-    all_columns = set()
-    for df in dataframes:
-        all_columns.update(df.columns)
+    is_valid = True
+    for index, dataframe in enumerate(dataframes, start=1):
+        missing = sorted(set(required_columns) - set(dataframe.columns))
+        if missing:
+            is_valid = False
+            logger.error(
+                "DataFrame %d: colunas de entrada ausentes: %s; disponíveis: %s",
+                index,
+                missing,
+                sorted(dataframe.columns.tolist()),
+            )
 
-    missing = set(required_columns) - all_columns
-
-    if missing:
-        logger.error(f"Colunas obrigatórias não encontradas: {missing}")
-        logger.info(f"Colunas disponíveis: {sorted(all_columns)}")
+    if not is_valid:
         return False
 
-    logger.info(f"Colunas obrigatórias validadas: {required_columns}")
+    logger.info("Colunas de entrada validadas em %d arquivo(s): %s", len(dataframes), required_columns)
     return True
 
 

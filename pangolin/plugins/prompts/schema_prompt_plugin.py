@@ -1,5 +1,5 @@
 from .base_prompt import BasePromptPlugin
-from plugins.prompts.config import PromptConfigFactory, PromptConfig
+from pangolin.plugins.prompts.config import PromptConfigFactory, PromptConfig
 from typing import Dict, Any, List, Optional
 import pandas as pd
 from difflib import SequenceMatcher
@@ -45,6 +45,17 @@ class SchemaPromptPlugin(BasePromptPlugin):
     def _default_output_format(self) -> str:
         return self.config.output_format or "Category: [CAT]\nExplanation: [Reason]"
 
+    def _send_prompt(self, prompt: str, **kwargs: Any) -> str:
+        """Envia uma chamada propagando apenas os overrides definidos na execução."""
+        call_options = {
+            "mode": self.config.parameters.get("mode", self.config.strategy),
+            "incident_id": kwargs.get("incident_id"),
+        }
+        for option in ("temperature", "max_tokens", "rate_limit"):
+            if kwargs.get(option) is not None:
+                call_options[option] = kwargs[option]
+        return self.model_plugin.send_prompt(prompt, **call_options)
+
     def _execute_direct(self, incident_text: str, data_row: pd.Series, columns: List[str], **kwargs) -> List[Dict[str, Any]]:
         context = {
             "input_framework": incident_text,
@@ -54,7 +65,7 @@ class SchemaPromptPlugin(BasePromptPlugin):
             "context_hints": self._build_context_hints(incident_text)
         }
         prompt_text = self._format_prompt(context)
-        response = self.model_plugin.send_prompt(prompt_text, mode=self.config.parameters.get("mode", self.config.strategy), incident_id=kwargs.get("incident_id"))
+        response = self._send_prompt(prompt_text, **kwargs)
         processed = self.extract_answer(response)
         return [{
             "Response": response,
@@ -71,7 +82,7 @@ class SchemaPromptPlugin(BasePromptPlugin):
 
     def _execute_hypothesis_testing(self, incident_text: str, data_row: pd.Series, columns: List[str], **kwargs) -> List[Dict[str, Any]]:
         key_words = getattr(self.config, "key_words", {})
-        max_iter = int(getattr(self.config, "max_iter", 12))
+        max_iter = int(kwargs.get("max_iterations", getattr(self.config, "max_iter", 12)))
         threshold = float(getattr(self.config, "quality_threshold", 0.9))
         categories = [cat for cat in key_words.keys() if cat.upper() != "UNKNOWN"]
 
@@ -89,7 +100,7 @@ class SchemaPromptPlugin(BasePromptPlugin):
                 "output_format": self._default_output_format()
             }
             prompt_text = self._format_prompt(context)
-            response = self.model_plugin.send_prompt(prompt_text, mode=self.config.parameters.get("mode", self.config.strategy), incident_id=kwargs.get("incident_id"))
+            response = self._send_prompt(prompt_text, **kwargs)
             extracted = self.extract_answer(response)
             result_cat = extracted.get("category", extracted.get("Category", "UNKNOWN"))
             score = self._calculate_similarity(result_cat, category)
@@ -117,7 +128,7 @@ class SchemaPromptPlugin(BasePromptPlugin):
         return results
 
     def _execute_progressive_hint(self, incident_text: str, data_row: pd.Series, columns: List[str], **kwargs) -> List[Dict[str, Any]]:
-        max_hints = int(getattr(self.config, "max_hints", 4))
+        max_hints = int(kwargs.get("max_iterations", getattr(self.config, "max_hints", 4)))
         threshold = float(getattr(self.config, "quality_threshold", 0.9))
         hint_template = getattr(self.config, "hint_template", "Hint: The previous prediction was {previous_category}. {input_framework} {output_format}")
 
@@ -126,7 +137,7 @@ class SchemaPromptPlugin(BasePromptPlugin):
             "output_format": self._default_output_format()
         }
         prompt_text = self._format_prompt(context)
-        response = self.model_plugin.send_prompt(prompt_text, mode=self.config.parameters.get("mode", self.config.strategy), incident_id=kwargs.get("incident_id"))
+        response = self._send_prompt(prompt_text, **kwargs)
         previous_category = self.extract_answer(response).get("category", "Unknown")
 
         if max_hints == 0:
@@ -147,7 +158,7 @@ class SchemaPromptPlugin(BasePromptPlugin):
                 "output_format": self._default_output_format()
             }
             hint_prompt = self._render_template(hint_template, hint_context)
-            response = self.model_plugin.send_prompt(hint_prompt, mode=self.config.parameters.get("mode", self.config.strategy), incident_id=kwargs.get("incident_id"))
+            response = self._send_prompt(hint_prompt, **kwargs)
             extracted = self.extract_answer(response)
             current_category = extracted.get("category", "Unknown")
             score = self._calculate_similarity(previous_category, current_category)
@@ -172,7 +183,7 @@ class SchemaPromptPlugin(BasePromptPlugin):
         }]
 
     def _execute_self_hint(self, incident_text: str, data_row: pd.Series, columns: List[str], **kwargs) -> List[Dict[str, Any]]:
-        max_iter = int(getattr(self.config, "max_iter", 4))
+        max_iter = int(kwargs.get("max_iterations", getattr(self.config, "max_iter", 4)))
         threshold = float(getattr(self.config, "quality_threshold", 0.9))
         plan_instructions = getattr(self.config, "plan_instructions", "Let\'s first understand the problem and devise a plan to solve it step by step.")
         output_format = self._default_output_format()
@@ -182,8 +193,7 @@ class SchemaPromptPlugin(BasePromptPlugin):
             "plan_instructions": plan_instructions,
             "output_format": output_format
         })
-        self.model_plugin.send_prompt(initial_prompt, mode=self.config.parameters.get("mode", self.config.strategy), incident_id=kwargs.get("incident_id"))
-        response = self.model_plugin.send_prompt(initial_prompt, mode=self.config.parameters.get("mode", self.config.strategy), incident_id=kwargs.get("incident_id"))
+        response = self._send_prompt(initial_prompt, **kwargs)
         previous_category = self.extract_answer(response).get("category", "Unknown")
 
         for i in range(max_iter):
@@ -193,7 +203,7 @@ class SchemaPromptPlugin(BasePromptPlugin):
                 "previous_category": previous_category,
                 "output_format": output_format
             })
-            response = self.model_plugin.send_prompt(refinement_prompt, mode=self.config.parameters.get("mode", self.config.strategy), incident_id=kwargs.get("incident_id"))
+            response = self._send_prompt(refinement_prompt, **kwargs)
             extracted = self.extract_answer(response)
             category = extracted.get("category", "Unknown")
             score = self._calculate_similarity(previous_category, category)
@@ -218,15 +228,15 @@ class SchemaPromptPlugin(BasePromptPlugin):
         }]
 
     def _execute_progressive_rectification(self, incident_text: str, data_row: pd.Series, columns: List[str], **kwargs) -> List[Dict[str, Any]]:
-        max_iter = int(getattr(self.config, "max_iter", 4))
+        max_iter = int(kwargs.get("max_iterations", getattr(self.config, "max_iter", 4)))
         threshold = float(getattr(self.config, "quality_threshold", 0.9))
         masking_template = getattr(self.config, "masking_template", "Replace all occurrences of '{subcategory}' with 'X' in the incident text.")
         rectification_template = getattr(self.config, "rectification_template", "Incident: {input_framework}\nThe answer is probably not: {rejected_category}\nLet\'s think step by step to reclassify.\n{output_format}")
 
-        response = self.model_plugin.send_prompt(self._format_prompt({
+        response = self._send_prompt(self._format_prompt({
             "input_framework": incident_text,
             "output_format": self._default_output_format()
-        }), mode=self.config.parameters.get("mode", self.config.strategy), incident_id=kwargs.get("incident_id"))
+        }), **kwargs)
         current_category = self.extract_answer(response).get("category", "Unknown")
         rejected_categories = []
 
@@ -237,13 +247,13 @@ class SchemaPromptPlugin(BasePromptPlugin):
                     "subcategory": subcategory,
                     "input_framework": incident_text
                 })
-                self.model_plugin.send_prompt(masked_prompt, mode=self.config.parameters.get("mode", self.config.strategy), incident_id=kwargs.get("incident_id"))
+                self._send_prompt(masked_prompt, **kwargs)
                 rectified_prompt = self._render_template(rectification_template, {
                     "input_framework": incident_text,
                     "rejected_category": ", ".join(rejected_categories + [current_category]),
                     "output_format": self._default_output_format()
                 })
-                response = self.model_plugin.send_prompt(rectified_prompt, mode=self.config.parameters.get("mode", self.config.strategy), incident_id=kwargs.get("incident_id"))
+                response = self._send_prompt(rectified_prompt, **kwargs)
                 extracted = self.extract_answer(response)
                 category = extracted.get("category", "Unknown")
                 score = self._calculate_similarity(current_category, category)

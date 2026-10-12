@@ -1,4 +1,4 @@
-from core.project.pangolin_project import PangolinProject
+from pangolin.core.project.pangolin_project import PangolinProject
 from pathlib import Path
 
 def cmd_destroy(args):
