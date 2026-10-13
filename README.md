@@ -131,6 +131,7 @@ O suporte é definido centralmente em `pangolin/core/plugin_manager.py`.
 | Provider | Implementação | Observação |
 |---|---|---|
 | `openai`, `anthropic`, `gemini`, `google`, `cohere`, `deepseek`, `groq` | `APIModel` / LiteLLM | A chave de ambiente segue `{PROVIDER}_API_KEY`; consulte também os requisitos do LiteLLM |
+| `openrouter` | `OpenRouterModel` / LiteLLM | `OPENROUTER_API_KEY`; aceita nomes de modelo com prefixo da organização |
 | `azure`, `bedrock`, `vertex`, `palm` | `APIModel` / LiteLLM | Exigem configuração específica do provider além dos parâmetros comuns |
 | `ollama`, `local` | `LocalModel` / LiteLLM | Ollama deve estar acessível; endpoint padrão `http://localhost:11434` |
 | `huggingface` | `HuggingfaceModel` | Requer `torch` e `transformers`, que não são instalados pelas dependências base atuais |
@@ -139,8 +140,33 @@ Para instalar o suporte opcional ao Hugging Face local, use
 `python -m pip install -e '.[huggingface]'`.
 
 `HuggingfaceModel` carrega modelos locais do Transformers; não é o mesmo caminho
-que chamar uma API hospedada do Hugging Face. Veja
-[a documentação de providers e configuração](docs/CONFIG_REFERENCE.md).
+que chamar uma API hospedada do Hugging Face.
+
+### OpenRouter
+
+O plugin `OpenRouterModel` usa `https://openrouter.ai/api/v1` por padrão e lê a
+chave de `OPENROUTER_API_KEY`. O campo `name` deve ser o identificador do modelo
+aceito pelo OpenRouter, incluindo o prefixo da organização:
+
+```yaml
+models:
+  - name: openai/gpt-5.2
+    provider: openrouter
+    temperature: 0.2
+    max_tokens: 1024
+    site_url: https://seu-dominio.example
+    app_name: Meu experimento Pangolin
+    extra_params:
+      route: fallback
+```
+
+`site_url` e `app_name` viram os cabeçalhos `HTTP-Referer` e
+`X-OpenRouter-Title`. `base_url` pode substituir o endpoint padrão. Opções
+específicas da API, como `response_format`, `plugins`, `models`, `provider` e
+`user`, podem ser passadas em `extra_params`. O `usage` devolvido pelo endpoint,
+incluindo custo quando disponível, é preservado em `logs/` junto à interação.
+Veja [o guia de OpenRouter](docs/OPENROUTER.md) para detalhes sobre cabeçalhos,
+parâmetros e limitações atuais.
 
 ## Técnicas de prompt
 
@@ -157,8 +183,8 @@ Os schemas padrão estão em `pangolin/schemas/` e podem ser personalizados em
 | `progressive_rectification` | Classificação e retificação iterativas |
 
 O campo `strategy` do schema seleciona a implementação executada por
-`SchemaPromptPlugin`. Consulte o [guia de schemas](docs/SCHEMAS_REFERENCIA_RAPIDA.md)
-antes de adicionar uma técnica.
+`SchemaPromptPlugin`; uma estratégia nova exige um schema válido e uma
+implementação `_execute_<strategy>`.
 
 ## Estrutura do pacote
 
@@ -181,9 +207,4 @@ pangolin/
 
 ## Documentação
 
-- [Arquitetura e contratos de extensão](docs/ARCHITECTURE.md)
-- [Referência de configuração](docs/CONFIG_REFERENCE.md)
-- [Guia de datasets](docs/DATASETS_GUIDE.md)
-- [Guia de criação de projetos](docs/NEW_PROJECT_GUIDE.md)
-- [Referência de schemas](docs/SCHEMAS_REFERENCIA_RAPIDA.md)
-- [Guia de arquitetura das estratégias](docs/GUIA_ARQUITETURA_PROMPTS.md)
+- [Integração OpenRouter](docs/OPENROUTER.md)

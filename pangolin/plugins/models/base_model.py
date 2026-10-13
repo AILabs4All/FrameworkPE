@@ -66,6 +66,7 @@ class BaseModel(ABC):
         output_tokens: int,
         mode: str,
         incident_id: Optional[str] = None,
+        provider_usage: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Registra métricas de interação."""
 
@@ -77,6 +78,7 @@ class BaseModel(ABC):
             prompt=prompt,
             response=response,
             incident_id=incident_id,
+            provider_usage=provider_usage,
         )
 
     def _apply_rate_limit(self, override: Optional[float] = None) -> None:

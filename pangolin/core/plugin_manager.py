@@ -8,6 +8,7 @@ from .observability.logger import setup_logger
 from pangolin.plugins.models.api_model import APIModel
 from pangolin.plugins.models.local_model import LocalModel
 from pangolin.plugins.models.huggingface_model import HuggingfaceModel
+from pangolin.plugins.models.openrouter_model import OpenRouterModel
 try:
     from pangolin.plugins.models.mock_model import MockModel
     MOCK_AVAILABLE = True
@@ -20,25 +21,27 @@ except ImportError:
 # Única tabela de providers: plugin em memória e arquivo de projeto ficam
 # vinculados na mesma entrada, evitando mapas que possam divergir.
 _PROVIDER_SPECS = {
-    'ollama': ('LocalModel', 'local_model.py'),
-    'local': ('LocalModel', 'local_model.py'),
-    'huggingface': ('HuggingfaceModel', 'huggingface_model.py'),
-    'openai': ('APIModel', 'api_model.py'),
-    'anthropic': ('APIModel', 'api_model.py'),
-    'gemini': ('APIModel', 'api_model.py'),
-    'google': ('APIModel', 'api_model.py'),
-    'cohere': ('APIModel', 'api_model.py'),
-    'deepseek': ('APIModel', 'api_model.py'),
-    'groq': ('APIModel', 'api_model.py'),
-    'azure': ('APIModel', 'api_model.py'),
-    'bedrock': ('APIModel', 'api_model.py'),
-    'vertex': ('APIModel', 'api_model.py'),
-    'palm': ('APIModel', 'api_model.py'),
+    'ollama': ('LocalModel', 'local_model.py', ()),
+    'local': ('LocalModel', 'local_model.py', ()),
+    'huggingface': ('HuggingfaceModel', 'huggingface_model.py', ()),
+    'openai': ('APIModel', 'api_model.py', ()),
+    'anthropic': ('APIModel', 'api_model.py', ()),
+    'gemini': ('APIModel', 'api_model.py', ()),
+    'google': ('APIModel', 'api_model.py', ()),
+    'cohere': ('APIModel', 'api_model.py', ()),
+    'deepseek': ('APIModel', 'api_model.py', ()),
+    'groq': ('APIModel', 'api_model.py', ()),
+    'openrouter': ('OpenRouterModel', 'openrouter_model.py', ('api_model.py',)),
+    'azure': ('APIModel', 'api_model.py', ()),
+    'bedrock': ('APIModel', 'api_model.py', ()),
+    'vertex': ('APIModel', 'api_model.py', ()),
+    'palm': ('APIModel', 'api_model.py', ()),
 }
 
 # Aliases mantidos para consumidores que importam esses mapas.
 PROVIDER_TO_MODEL = {name: spec[0] for name, spec in _PROVIDER_SPECS.items()}
 MODEL_MODULE_FILES = {name: spec[1] for name, spec in _PROVIDER_SPECS.items()}
+MODEL_MODULE_DEPENDENCIES = {name: spec[2] for name, spec in _PROVIDER_SPECS.items()}
 
 _SCHEMAS_DIR = Path(__file__).resolve().parent.parent / "schemas"
 
@@ -70,6 +73,7 @@ class PluginManager:
         """Registra plugins padrão do framework."""
         # Registra plugins de modelo
         self.register_model_plugin("APIModel", APIModel)
+        self.register_model_plugin("OpenRouterModel", OpenRouterModel)
         self.register_model_plugin("LocalModel", LocalModel)
         self.register_model_plugin("HuggingfaceModel", HuggingfaceModel)
         if MOCK_AVAILABLE:
@@ -128,6 +132,13 @@ class PluginManager:
                 f"{_suggestion(provider, MODEL_MODULE_FILES.keys())}"
             )
         return plugin_file
+
+    def resolve_model_plugin_files(self, provider: str) -> List[str]:
+        """Retorna o plugin e seus módulos locais necessários para vendorização."""
+        normalized_provider = (provider or '').strip().lower()
+        plugin_file = self.resolve_model_plugin_file(normalized_provider)
+        dependencies = MODEL_MODULE_DEPENDENCIES[normalized_provider]
+        return [plugin_file, *dependencies]
 
     def resolve_schema_file(self, technique: str) -> Path:
         """

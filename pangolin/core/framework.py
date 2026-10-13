@@ -2,6 +2,7 @@ from typing import Dict, Any, List, Optional
 import pandas as pd
 import tqdm
 from pathlib import Path
+import re
 
 from .plugin_manager import PluginManager
 from pangolin.plugins.prompts.schema_prompt_plugin import SchemaPromptPlugin
@@ -26,6 +27,12 @@ class PangolinFramework:
         self.metrics_collector = MetricsCollector(log_dir=metrics_dir)
 
         self.logger.info("PangolinFramework iniciado")
+
+    @staticmethod
+    def _filename_component(value: Any) -> str:
+        """Converte identificadores externos em componentes seguros de nome de arquivo."""
+        component = re.sub(r"[^A-Za-z0-9._-]+", "_", str(value)).strip("._-")
+        return component or "unknown"
         
     def process_incidents(self, input_dir: str, columns: List[str], model_config: Dict[str, Any], 
                          prompt_techniques: List[str], output_format: str = "csv", **kwargs) -> Dict[str, Any]:
@@ -44,6 +51,7 @@ class PangolinFramework:
             Dict com resultados e métricas
         """
         model_name = model_config.get('name', 'unknown')
+        model_file_component = self._filename_component(model_name)
         self.logger.info(f"Iniciando processamento - Modelo: {model_name}, Técnicas: {prompt_techniques}")
         
         # Carrega dados
@@ -99,9 +107,13 @@ class PangolinFramework:
 
             # Mantém a extensão e o formato solicitados alinhados.
             if self.project:
-                output_path = str(self.project.get_results_path(f"resultados_{model_name}_{technique}"))
+                technique_file_component = self._filename_component(technique)
+                output_path = str(self.project.get_results_path(
+                    f"resultados_{model_file_component}_{technique_file_component}"
+                ))
             else:
-                output_path = f"resultados_{model_name}_{technique}"
+                technique_file_component = self._filename_component(technique)
+                output_path = f"resultados_{model_file_component}_{technique_file_component}"
 
             save_results(results, output_path, output_format)
             output_files.append(f"{output_path}.{output_format.lower()}")
@@ -117,7 +129,11 @@ class PangolinFramework:
         # Salva métricas no projeto se disponível
         technique_str = "_".join(techniques) if isinstance(prompt_techniques, list) else prompt_techniques
         if self.project:
-            metrics_file = self.project.get_metrics_path(f"performance_{model_name}_{technique_str}.json")
+            technique_file_component = self._filename_component(technique_str)
+            metrics_file = self.project.get_metrics_path(
+                f"performance_{model_file_component}_{technique_file_component}.json"
+            )
+            metrics_file.parent.mkdir(parents=True, exist_ok=True)
             import json
             with open(metrics_file, 'w', encoding='utf-8') as f:
                 json.dump(performance_summary, f, indent=2)

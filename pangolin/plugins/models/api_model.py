@@ -11,7 +11,7 @@ from .base_model import BaseModel
 
 
 class APIModel(BaseModel):
-    """Modelo para provedores acessados via API (OpenAI, Hugging Face, etc)."""
+    """Modelo genérico para provedores de API suportados pelo LiteLLM."""
 
     def setup_model(self) -> None:
         env_key = f"{self.provider.upper()}_API_KEY"
@@ -81,8 +81,21 @@ class APIModel(BaseModel):
 
             response = litellm.completion(**completion_kwargs)
             content = self._extract_content(response)
-            output_tokens = self.count_tokens(content)
-            self._log_interaction(prompt, content, input_tokens, output_tokens, mode, kwargs.get('incident_id'))
+            provider_usage = self._extract_usage(response)
+            if provider_usage:
+                input_tokens = int(provider_usage.get("prompt_tokens", input_tokens))
+                output_tokens = int(provider_usage.get("completion_tokens", self.count_tokens(content)))
+            else:
+                output_tokens = self.count_tokens(content)
+            self._log_interaction(
+                prompt,
+                content,
+                input_tokens,
+                output_tokens,
+                mode,
+                kwargs.get("incident_id"),
+                provider_usage=provider_usage,
+            )
             return content
         except Exception as exc:
             self.logger.error("Falha ao chamar modelo API: %s", exc)
@@ -104,6 +117,28 @@ class APIModel(BaseModel):
         if self.model_name.startswith(prefix):
             return self.model_name
         return f"{prefix}{self.model_name}"
+
+    @staticmethod
+    def _extract_usage(response: Any) -> Dict[str, Any]:
+        """Normaliza usage retornado pelo provider para persistência em JSON."""
+        usage = response.get("usage") if isinstance(response, dict) else getattr(response, "usage", None)
+        if usage is None:
+            return {}
+        if hasattr(usage, "model_dump"):
+            usage = usage.model_dump()
+        elif not isinstance(usage, dict):
+            usage = {
+                key: getattr(usage, key)
+                for key in (
+                    "prompt_tokens",
+                    "completion_tokens",
+                    "total_tokens",
+                    "cost",
+                    "cost_details",
+                )
+                if getattr(usage, key, None) is not None
+            }
+        return usage if isinstance(usage, dict) else {}
 
     @staticmethod
     def _resolve_secret(value: Any) -> Any:

@@ -20,7 +20,8 @@ class TokenMetrics:
     def log_interaction(self, model_name: str, mode: str,
                         input_tokens: int, output_tokens: int,
                         prompt: str, response: str,
-                        incident_id: Optional[str] = None):
+                        incident_id: Optional[str] = None,
+                        provider_usage: Optional[Dict[str, Any]] = None):
         """Registra uma interação com o modelo."""
         interaction = {
             "timestamp": datetime.now().isoformat(),
@@ -35,6 +36,8 @@ class TokenMetrics:
 
         if incident_id is not None:
             interaction["id"] = incident_id
+        if provider_usage:
+            interaction["provider_usage"] = provider_usage
 
         self.interactions.append(interaction)
         self._save_to_file(interaction, model_name, mode)

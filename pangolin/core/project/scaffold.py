@@ -12,7 +12,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
 
-from ..plugin_manager import MODEL_MODULE_FILES, PluginManager
+from ..plugin_manager import PluginManager
 
 
 def get_default_config(project_name: str) -> Dict[str, Any]:
@@ -115,18 +115,23 @@ def import_model_plugins(project, config: Dict[str, Any]) -> List[str]:
     for model in config.get('models', []):
         provider = model.get('provider', 'ollama').lower()
         plugin_manager.resolve_model(provider)
-        plugin_file = MODEL_MODULE_FILES[provider]
-        source_file = framework_plugins / plugin_file
+        plugin_files = plugin_manager.resolve_model_plugin_files(provider)
+        for plugin_file in plugin_files:
+            source_file = framework_plugins / plugin_file
+            if not source_file.exists():
+                raise FileNotFoundError(
+                    f"Arquivo do plugin '{provider}' não encontrado: {source_file}"
+                )
 
-        if not source_file.exists():
-            project.logger.warning("Arquivo de plugin não encontrado: %s", source_file)
-            continue
-
-        dest_file = project.model_dir / plugin_file
-        if not dest_file.exists():
-            shutil.copy2(source_file, dest_file)
-            imported.add(plugin_file)
-            project.logger.info(f"Plugin de modelo importado: {plugin_file} (provider: {provider})")
+            dest_file = project.model_dir / plugin_file
+            if not dest_file.exists():
+                shutil.copy2(source_file, dest_file)
+                imported.add(plugin_file)
+                project.logger.info(
+                    "Módulo de modelo importado: %s (provider: %s)",
+                    plugin_file,
+                    provider,
+                )
 
         base_source = framework_plugins / "base_model.py"
         base_dest = project.model_dir / "base_model.py"
